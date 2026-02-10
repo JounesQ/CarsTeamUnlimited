@@ -1,0 +1,9 @@
+{
+  "include": ["vite.config.*"],
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"]
+  }
+}
