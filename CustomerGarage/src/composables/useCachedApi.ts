@@ -74,7 +74,8 @@ export function useCachedVehicles() {
         error.value = null
       } else {
         // No cache available and fetch failed - this is a real error
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load vehicles'
+        // The API client already transforms network errors to friendly messages
+        const errorMessage = err instanceof Error ? err.message : 'Our server is currently under maintenance. Please try again later.'
         error.value = errorMessage
         if (onError) {
           onError(err instanceof Error ? err : new Error(errorMessage))
