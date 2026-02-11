@@ -313,9 +313,9 @@ watch(() => route.query, (q) => {
                       {{ formatTerm(key) }}
                     </button>
                   </div>
-                  <div v-if="selectedTerm" class="monthly-amount">
+                  <div v-if="selectedTerm && modalVehicle.financing_options[selectedTerm] != null" class="monthly-amount">
                     <span class="amount-label">Monthly payment:</span>
-                    <span class="amount-value">{{ formatPrice(modalVehicle.financing_options[selectedTerm]) }}</span>
+                    <span class="amount-value">{{ formatPrice(modalVehicle.financing_options[selectedTerm]!) }}</span>
                   </div>
                 </div>
               </div>
