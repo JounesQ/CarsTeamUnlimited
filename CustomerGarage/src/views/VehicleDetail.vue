@@ -43,6 +43,10 @@ function formatTerm(key: string) {
   return n ? `${n} years` : key.replace(/_/g, ' ')
 }
 
+function formatStatus(status: string) {
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
 onMounted(async () => {
   const id = route.params.id as string
   if (!id) { error.value = 'Invalid vehicle'; loading.value = false; return }
@@ -76,26 +80,33 @@ onMounted(async () => {
         </div>
       </div>
       <div class="specs">
-        <h2>Details</h2>
+        <h1>Details</h1>
         <dl>
           <dt>Year</dt><dd>{{ vehicle.year }}</dd>
           <dt>Make / Model</dt><dd>{{ vehicle.make }} {{ vehicle.model }}</dd>
+          <dt>Type</dt><dd>{{ vehicle.vehicle_type || '—' }}</dd>
+          <dt>Category</dt><dd>{{ vehicle.category || '—' }}</dd>
           <dt>Transmission</dt><dd>{{ vehicle.transmission }}</dd>
-          <dt>Fuel</dt><dd>{{ vehicle.fuel_type || '—' }}</dd>
+          <dt>Fuel Type</dt><dd>{{ vehicle.fuel_type || '—' }}</dd>
           <dt>Color</dt><dd>{{ vehicle.color || '—' }}</dd>
-          <dt>Mileage</dt><dd>{{ vehicle.mileage != null ? vehicle.mileage.toLocaleString() + ' mi' : '—' }}</dd>
+          <dt>Mileage</dt><dd>{{ vehicle.mileage != null ? vehicle.mileage.toLocaleString() + ' km' : '—' }}</dd>
           <dt>Doors</dt><dd>{{ vehicle.door_count ?? '—' }}</dd>
           <dt>Seats</dt><dd>{{ vehicle.seat_capacity ?? '—' }}</dd>
-          <dt>Views</dt><dd>{{ vehicle.views_count }}</dd>
+          <dt>Grade</dt><dd>{{ vehicle.grade || '—' }}</dd>
         </dl>
       </div>
       <div v-if="vehicle.down_payment != null || (vehicle.financing_options && Object.keys(vehicle.financing_options).length)" class="financing">
-        <h2>Financing</h2>
+        <h1>Financing</h1>
         <p v-if="vehicle.down_payment != null">Down payment: {{ formatPrice(vehicle.down_payment) }} <span v-if="vehicle.dp_all_in">(all-in)</span></p>
         <div v-if="vehicle.financing_options && Object.keys(vehicle.financing_options).length" class="installments">
           <h3>Monthly installments</h3>
           <table class="installments-table">
-            <thead><tr><th>Term</th><th>Monthly</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Term</th>
+                <th>Monthly</th>
+              </tr>
+            </thead>
             <tbody>
               <tr v-for="[key, monthly] in sortedInstallments" :key="key">
                 <td>{{ formatTerm(key) }}</td>

@@ -9,7 +9,7 @@ const { theme, toggleTheme } = useTheme()
   <div class="app-wrap">
     <header class="site-header">
       <RouterLink to="/vehicles" class="logo">
-        <img src="/p7-logo.png" alt="P7 Garahe Gallery" class="logo-img" />
+        <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="logo-img" />
         <div class="logo-text">
           <span class="logo-brand">P7 GARAHE GALLERY</span>
           <span class="logo-subtitle">Admin Panel</span>
@@ -80,6 +80,7 @@ const { theme, toggleTheme } = useTheme()
   width: 48px;
   height: 48px;
   object-fit: contain;
+  background: transparent;
 }
 
 .logo-text {

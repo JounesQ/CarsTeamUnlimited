@@ -101,6 +101,10 @@ function formatTerm(key: string) {
   return n ? `${n} years` : key.replace(/_/g, ' ')
 }
 
+function formatStatus(status: string) {
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
 async function openModal(id: string) {
   modalError.value = ''
   carouselIndex.value = 0
@@ -172,9 +176,7 @@ watch(() => route.query, (q) => {
   vehicleType.value = (q.vehicle_type as string) || ''
   category.value = (q.category as string) || ''
   fuelType.value = (q.fuel_type as string) || ''
-  year.value = q.year ? Number(q.year) : undefined
-  minPrice.value = q.min_price ? Number(q.min_price) : undefined
-  maxPrice.value = q.max_price ? Number(q.max_price) : undefined
+ 
   load()
 })
 </script>
@@ -203,9 +205,6 @@ watch(() => route.query, (q) => {
       <button type="button" class="btn btn-primary" @click="search">Search</button>
     </div>
     <div v-if="cachedVehicles.loading.value" class="loading">Loading…</div>
-    <div v-else-if="cachedVehicles.isStale.value" class="cache-indicator">
-      Showing cached data • Refreshing in background…
-    </div>
     
     <!-- Grouped by Make -->
     <div v-if="!cachedVehicles.loading.value && vehicles.length > 0" class="vehicles-by-make">
@@ -219,7 +218,10 @@ watch(() => route.query, (q) => {
             </div>
             <div class="card-body">
               <h3 class="card-title">{{ v.year }} {{ v.make }} {{ v.model }}</h3>
-              <p class="card-price">{{ formatPrice(v.price) }}</p>
+              <div class="card-footer">
+                <p class="card-price">{{ formatPrice(v.price) }}</p>
+                <span v-if="v.status === 'available'" class="status-badge">Available</span>
+              </div>
             </div>
           </li>
         </ul>
@@ -227,7 +229,7 @@ watch(() => route.query, (q) => {
     </div>
     
     <div v-if="!cachedVehicles.loading.value && vehicles.length === 0" class="empty">
-      {{ cachedVehicles.error.value || 'No vehicles found.' }}
+      {{ cachedVehicles.error.value || 'Loading . . .' }}
     </div>
 
     <!-- Vehicle detail modal -->
@@ -283,13 +285,15 @@ watch(() => route.query, (q) => {
                 <dl>
                   <dt>Year</dt><dd>{{ modalVehicle.year }}</dd>
                   <dt>Make / Model</dt><dd>{{ modalVehicle.make }} {{ modalVehicle.model }}</dd>
+                  <dt>Type</dt><dd>{{ modalVehicle.vehicle_type || '—' }}</dd>
+                  <dt>Category</dt><dd>{{ modalVehicle.category || '—' }}</dd>
                   <dt>Transmission</dt><dd>{{ modalVehicle.transmission }}</dd>
-                  <dt>Fuel</dt><dd>{{ modalVehicle.fuel_type || '—' }}</dd>
+                  <dt>Fuel Type</dt><dd>{{ modalVehicle.fuel_type || '—' }}</dd>
                   <dt>Color</dt><dd>{{ modalVehicle.color || '—' }}</dd>
-                  <dt>Mileage</dt><dd>{{ modalVehicle.mileage != null ? modalVehicle.mileage.toLocaleString() + ' mi' : '—' }}</dd>
+                  <dt>Mileage</dt><dd>{{ modalVehicle.mileage != null ? modalVehicle.mileage.toLocaleString() + ' km' : '—' }}</dd>
                   <dt>Doors</dt><dd>{{ modalVehicle.door_count ?? '—' }}</dd>
                   <dt>Seats</dt><dd>{{ modalVehicle.seat_capacity ?? '—' }}</dd>
-                  <dt>Views</dt><dd>{{ modalVehicle.views_count }}</dd>
+                  <dt>Grade</dt><dd>{{ modalVehicle.grade || '—' }}</dd>
                 </dl>
               </div>
               <div v-if="modalVehicle.down_payment != null || (modalVehicle.financing_options && Object.keys(modalVehicle.financing_options).length)" class="modal-financing">
@@ -335,7 +339,6 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .btn-primary { background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; border-color: transparent; font-weight: 600; }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4); }
 .loading, .empty { text-align: center; padding: 3rem; color: var(--color-text); font-size: 1.1rem; }
-.cache-indicator { text-align: center; padding: 0.75rem; font-size: 0.85rem; color: var(--gold-primary); background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; margin-bottom: 1.5rem; }
 
 /* Vehicles grouped by make */
 .vehicles-by-make { display: flex; flex-direction: column; gap: 3rem; }
@@ -373,6 +376,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .card-img { width: 100%; height: 100%; object-fit: cover; }
 .card-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-size: 0.9rem; }
 .card-body { padding: 1.25rem; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.status-badge { padding: 0.375rem 0.75rem; background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 6px; white-space: nowrap; }
 .card-title { font-size: 1.05rem; margin: 0 0 0.5rem; color: var(--color-text); font-weight: 600; }
 .card-price { font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--gold-primary); }
 .card-meta { font-size: 0.85rem; margin: 0; color: var(--color-text-muted); }
@@ -483,9 +488,9 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .term-btn { padding: 0.75rem 1.5rem; border: 2px solid var(--color-border); border-radius: 10px; background: var(--color-background); color: var(--color-text); cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.3s ease; }
 .term-btn:hover { border-color: var(--gold-primary); background: rgba(212, 175, 55, 0.05); transform: translateY(-2px); }
 .term-btn.active { border-color: var(--gold-primary); background: rgba(212, 175, 55, 0.15); color: var(--gold-primary); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2); }
-.monthly-amount { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05)); border-radius: 12px; border: 2px solid var(--gold-primary); }
-.amount-label { font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
-.amount-value { font-size: 2rem; font-weight: 900; color: var(--gold-primary); text-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+.monthly-amount { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 1.25rem; background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05)); border-radius: 10px; border: 2px solid var(--gold-primary); }
+.amount-label { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.amount-value { font-size: 1.35rem; font-weight: 900; color: var(--gold-primary); text-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
 
 .modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
 .modal-enter-from, .modal-leave-to { opacity: 0; }
@@ -508,19 +513,21 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   .filters {
     display: none;
     position: fixed;
-    top: 0;
     left: 0;
     right: 0;
     bottom: 70px;
+    height: 33vh;
     z-index: 2000;
-    background: rgba(0, 0, 0, 0.98);
+    background: var(--color-background-soft);
     margin: 0;
     padding: 1.5rem;
-    border-radius: 0;
-    border: none;
+    border-radius: 20px 20px 0 0;
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-bottom: none;
     overflow-y: auto;
     flex-direction: column;
     gap: 1rem;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
   }
 
   /* Show filters when toggled */
@@ -536,12 +543,6 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
     width: 100%;
     padding: 1rem;
     font-size: 1rem;
-  }
-
-  .cache-indicator {
-    margin: 0 0.5rem 1rem;
-    font-size: 0.75rem;
-    padding: 0.5rem;
   }
 
   /* Make sections on mobile */
@@ -591,6 +592,11 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   .card-price {
     font-size: 1rem;
+  }
+
+  .status-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6rem;
   }
 
   .loading,
@@ -673,11 +679,16 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .monthly-amount {
-    padding: 1.25rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .amount-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
   }
 
   .amount-value {
-    font-size: 1.75rem;
+    font-size: 1.2rem;
   }
 }
 

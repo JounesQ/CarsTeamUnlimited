@@ -8,7 +8,7 @@ const router = useRouter()
     <div class="hero-section">
       <div class="hero-content">
         <div class="logo-container">
-          <img src="/p7-logo.png" alt="P7 Garahe Gallery" class="logo" />
+          <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="logo" />
         </div>
         <h1 class="brand-name">P7 GARAHE GALLERY</h1>
         <p class="tagline">WE KNOW YOUR NEEDS</p>
@@ -119,7 +119,8 @@ const router = useRouter()
               </div>
               <div class="info-content">
                 <h3>Phone</h3>
-                <p>+63 XXX XXX XXXX</p>
+                <p>+63 955 213 4607</p>
+                <p>+63 966 411 8317</p>
               </div>
             </div>
             <div class="info-item">
@@ -183,6 +184,7 @@ const router = useRouter()
   width: 180px;
   height: 180px;
   object-fit: contain;
+  background: transparent;
   filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.5));
 }
 

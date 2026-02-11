@@ -52,7 +52,7 @@ function displayUrl(path: string) {
 }
 
 function addImage() {
-  if (form.value.images.length < 4) {
+  if (form.value.images.length < 10) {
     form.value.images.push({ image_path: '', position: form.value.images.length + 1, is_primary: false })
   }
 }
@@ -269,7 +269,7 @@ onMounted(() => loadVehicle())
         </div>
       </div>
       <div class="images-section">
-        <h3>Images (upload photo, max 4)</h3>
+        <h3>Images (upload photo, max 10)</h3>
         <div v-for="(img, idx) in form.images" :key="idx" class="image-slot">
           <div class="image-preview">
             <img v-if="img.image_path" :src="displayUrl(img.image_path)" :alt="'Preview ' + (idx + 1)" />
@@ -283,7 +283,7 @@ onMounted(() => loadVehicle())
             <button v-if="form.images.length > 1" type="button" class="btn btn-sm" @click="removeImage(idx)">Remove</button>
           </div>
         </div>
-        <button v-if="form.images.length < 4" type="button" class="btn btn-sm" @click="addImage">Add image slot</button>
+        <button v-if="form.images.length < 10" type="button" class="btn btn-sm" @click="addImage">Add image slot</button>
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-cancel-form" @click="router.push('/vehicles')" :disabled="loading">

@@ -18,7 +18,7 @@ const toggleMobileFilters = () => {
   <div class="app-wrap">
     <header class="site-header" :class="{ 'header-transparent': isHomePage }">
       <RouterLink to="/" class="logo">
-        <img src="/p7-logo.png" alt="P7 Garahe Gallery" class="logo-img" />
+        <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="logo-img" />
         <span class="logo-text">P7 GARAHE GALLERY</span>
       </RouterLink>
       <nav class="nav desktop-nav">
@@ -66,26 +66,7 @@ const toggleMobileFilters = () => {
     </nav>
     
     <footer class="site-footer desktop-footer">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h4>P7 GARAHE GALLERY</h4>
-          <p>Your premium destination for quality vehicles</p>
-        </div>
-        <div class="footer-section">
-          <h4>Quick Links</h4>
-          <RouterLink to="/">Home</RouterLink>
-          <RouterLink to="/vehicles">Browse Vehicles</RouterLink>
-          <RouterLink to="/about">About Us</RouterLink>
-        </div>
-        <div class="footer-section">
-          <h4>Contact</h4>
-          <p>Email: info@p7garahe.com</p>
-          <p>Phone: +63 XXX XXX XXXX</p>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2024 P7 Garahe Gallery. All rights reserved.</p>
-      </div>
+      <p>&copy; 2026 P7 Garahe Gallery. All rights reserved.</p>
     </footer>
   </div>
 </template>
@@ -137,6 +118,7 @@ const toggleMobileFilters = () => {
   width: 48px;
   height: 48px;
   object-fit: contain;
+  background: transparent;
 }
 
 .logo-text {
@@ -208,50 +190,14 @@ const toggleMobileFilters = () => {
 .site-footer {
   background: #0a0a0a;
   border-top: 1px solid rgba(212, 175, 55, 0.2);
-  padding: 3rem 2rem 1rem;
-  color: #e0e0e0;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-}
-
-.footer-section h4 {
-  color: #d4af37;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}
-
-.footer-section p {
-  color: #b0b0b0;
-  margin: 0.5rem 0;
-  line-height: 1.6;
-}
-
-.footer-section a {
-  display: block;
-  color: #b0b0b0;
-  text-decoration: none;
-  margin: 0.5rem 0;
-  transition: color 0.3s ease;
-}
-
-.footer-section a:hover {
-  color: #d4af37;
-}
-
-.footer-bottom {
+  padding: 1.5rem 2rem;
   text-align: center;
-  padding-top: 2rem;
   color: #888;
   font-size: 0.9rem;
+}
+
+.site-footer p {
+  margin: 0;
 }
 
 /* Responsive */
