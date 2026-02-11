@@ -122,7 +122,8 @@ async function openModal(id: string) {
       selectedTerm.value = sortedInstallments.value[0]?.[0] || null
     }
   } catch (e) {
-    modalError.value = e instanceof Error ? e.message : 'Failed to load vehicle'
+    // The API client already transforms network errors to friendly messages
+    modalError.value = e instanceof Error ? e.message : 'Unable to load vehicle details. Please try again later.'
     modalVehicle.value = null
     modalOpen.value = true // Show modal with error
   }
@@ -516,17 +517,18 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
     left: 0;
     right: 0;
     bottom: 70px;
-    height: 33vh;
+    height: auto;
     z-index: 2000;
     background: var(--color-background-soft);
     margin: 0;
-    padding: 1.5rem;
+    padding: 1rem 1rem 1.25rem;
     border-radius: 20px 20px 0 0;
     border: 2px solid rgba(212, 175, 55, 0.3);
     border-bottom: none;
     overflow-y: auto;
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.65rem;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
   }
 
@@ -536,13 +538,16 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .filter-inp {
-    width: 100%;
+    width: calc(50% - 0.325rem);
+    padding: 0.7rem 0.875rem;
+    font-size: 0.9rem;
   }
 
   .btn-primary {
     width: 100%;
-    padding: 1rem;
+    padding: 0.8rem 1rem;
     font-size: 1rem;
+    margin-top: 0.25rem;
   }
 
   /* Make sections on mobile */

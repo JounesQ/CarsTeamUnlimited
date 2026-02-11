@@ -17,23 +17,34 @@ export function imageUrl(path: string): string {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = path.startsWith('http') ? path : `${API_BASE}${path}`
-  const res = await fetch(url, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...options.headers },
-  })
-  if (!res.ok) {
-    const text = await res.text()
-    let err: string
-    try {
-      const j = JSON.parse(text)
-      err = j.message || JSON.stringify(j.errors || j)
-    } catch {
-      err = text || res.statusText
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...options.headers },
+    })
+    if (!res.ok) {
+      const text = await res.text()
+      let err: string
+      try {
+        const j = JSON.parse(text)
+        err = j.message || JSON.stringify(j.errors || j)
+      } catch {
+        err = text || res.statusText
+      }
+      throw new Error(err)
     }
-    throw new Error(err)
+    if (res.status === 204) return undefined as T
+    return res.json() as Promise<T>
+  } catch (error) {
+    // Replace browser's network error messages with a friendly message
+    if (error instanceof Error) {
+      const msg = error.message.toLowerCase()
+      if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('fetch')) {
+        throw new Error('Unable to connect to server. We are currently under maintenance. Please try again later.')
+      }
+    }
+    throw error
   }
-  if (res.status === 204) return undefined as T
-  return res.json() as Promise<T>
 }
 
 export const api = {

@@ -53,7 +53,8 @@ onMounted(async () => {
   try {
     vehicle.value = await api.getVehicle(id)
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Failed to load vehicle'
+    // The API client already transforms network errors to friendly messages
+    error.value = e instanceof Error ? e.message : 'Unable to load vehicle details. Please try again later.'
   } finally {
     loading.value = false
   }
