@@ -108,7 +108,7 @@ class VehicleController extends Controller
         return $request->validate([
             'title' => 'required|string|max:200',
             'slug' => 'nullable|string|max:200|' . $slugRule,
-            'status' => 'nullable|string|in:available,sold,reserved,draft',
+            'status' => 'nullable|string|in:available,sold,reserved,coming',
             'year' => 'required|integer|min:1900|max:2100',
             'make' => 'required|string|max:50',
             'model' => 'required|string|max:50',

@@ -12,6 +12,10 @@ const loading = ref(false)
 const saveError = ref('')
 const uploadingIndex = ref<number | null>(null)
 
+// Confirmation modal state
+const confirmModalOpen = ref(false)
+const confirmModalLoading = ref(false)
+
 const form = ref<VehicleForm>({
   title: '',
   status: 'available',
@@ -119,13 +123,22 @@ async function loadVehicle() {
   }
 }
 
-async function save() {
+function openSaveConfirmation() {
   saveError.value = ''
   if (!form.value.title?.trim() || !form.value.make?.trim() || !form.value.model?.trim() || form.value.price < 0) {
     saveError.value = 'Please fill required fields (title, make, model, price).'
     return
   }
-  loading.value = true
+  confirmModalOpen.value = true
+}
+
+function closeConfirmModal() {
+  confirmModalOpen.value = false
+  confirmModalLoading.value = false
+}
+
+async function confirmSave() {
+  confirmModalLoading.value = true
   try {
     const images = form.value.images.filter((i) => i.image_path.trim())
     const payload = { ...form.value, images }
@@ -134,11 +147,13 @@ async function save() {
     } else {
       await api.admin.createVehicle(payload)
     }
+    closeConfirmModal()
     router.push('/vehicles')
   } catch (e) {
     saveError.value = e instanceof Error ? e.message : 'Save failed'
+    closeConfirmModal()
   } finally {
-    loading.value = false
+    confirmModalLoading.value = false
   }
 }
 
@@ -152,7 +167,7 @@ onMounted(() => loadVehicle())
       <button type="button" class="btn" @click="router.push('/vehicles')">← Back to list</button>
     </div>
     <p v-if="saveError" class="error">{{ saveError }}</p>
-    <form @submit.prevent="save" class="form">
+    <form @submit.prevent="openSaveConfirmation" class="form">
       <div class="form-grid">
         <div class="field">
           <label>Title *</label>
@@ -271,38 +286,230 @@ onMounted(() => loadVehicle())
         <button v-if="form.images.length < 4" type="button" class="btn btn-sm" @click="addImage">Add image slot</button>
       </div>
       <div class="form-actions">
+        <button type="button" class="btn btn-cancel-form" @click="router.push('/vehicles')" :disabled="loading">
+          Cancel
+        </button>
         <button type="submit" class="btn btn-primary" :disabled="loading">{{ loading ? 'Saving…' : 'Save' }}</button>
       </div>
     </form>
+
+    <!-- Confirmation Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="confirmModalOpen" class="modal-overlay confirm-overlay" @click.self="closeConfirmModal">
+          <div class="confirm-modal" @click.stop>
+            <div class="confirm-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+            </div>
+            <h3 class="confirm-title">{{ isEdit ? 'Confirm Update' : 'Confirm Save' }}</h3>
+            <p class="confirm-message">
+              {{ isEdit 
+                ? `Are you sure you want to update "${form.title}"?` 
+                : `Are you sure you want to create "${form.title}"?` 
+              }}
+            </p>
+            <div class="confirm-actions">
+              <button type="button" class="btn btn-cancel" @click="closeConfirmModal" :disabled="confirmModalLoading">
+                Cancel
+              </button>
+              <button type="button" class="btn btn-confirm" @click="confirmSave" :disabled="confirmModalLoading">
+                <span v-if="!confirmModalLoading">{{ isEdit ? 'Update' : 'Save' }}</span>
+                <span v-else>Saving...</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-.admin-form { max-width: 700px; margin: 0 auto; padding: 1rem 0; }
-.form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.form-header h1 { font-size: 1.5rem; margin: 0; color: var(--color-heading); }
-.btn { padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-background-mute); color: var(--color-text); cursor: pointer; }
-.btn-primary { background: hsla(160, 100%, 37%, 1); color: white; border-color: transparent; }
-.btn-sm { padding: 0.25rem 0.5rem; font-size: 0.85rem; }
-.error { color: #c00; margin-bottom: 1rem; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-.field { display: flex; flex-direction: column; gap: 0.25rem; }
-.field label { font-size: 0.9rem; font-weight: 500; }
-.field input, .field select { padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-background); color: var(--color-text); }
+.admin-form { max-width: 800px; margin: 0 auto; padding: 2rem 0; }
+.form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.form-header h1 { font-size: 2rem; margin: 0; color: var(--color-heading); font-weight: 700; }
+.btn { padding: 0.625rem 1.25rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background-mute); color: var(--color-text); cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
+.btn:hover { border-color: var(--gold-primary); color: var(--gold-primary); }
+.btn-primary { background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; border-color: transparent; font-weight: 600; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4); color: #000; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 0.875rem; }
+.error { color: #ff6b6b; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); border-radius: 8px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+.field { display: flex; flex-direction: column; gap: 0.5rem; }
+.field label { font-size: 0.95rem; font-weight: 600; color: var(--color-heading); }
+.field input, .field select { padding: 0.625rem 0.875rem; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background); color: var(--color-text); transition: border-color 0.3s ease; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--gold-primary); }
 .field.checkbox { flex-direction: row; align-items: center; }
-.field.checkbox label { display: flex; align-items: center; gap: 0.5rem; }
-.financing-section { margin-bottom: 1.5rem; }
-.financing-section h3 { font-size: 1rem; margin: 0 0 0.25rem; }
-.hint { font-size: 0.85rem; opacity: 0.9; margin: 0 0 0.5rem; }
-.installment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; }
-.images-section { margin-bottom: 1.5rem; }
-.images-section h3 { font-size: 1rem; margin: 0 0 0.75rem; }
-.image-slot { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background-mute); }
-.image-preview { width: 140px; height: 95px; flex-shrink: 0; border-radius: 6px; overflow: hidden; background: var(--color-background); border: 1px solid var(--color-border); }
+.field.checkbox label { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
+.financing-section { margin-bottom: 2rem; padding: 1.5rem; background: var(--color-background-soft); border: 1px solid var(--color-border); border-radius: 12px; }
+.financing-section h3 { font-size: 1.15rem; margin: 0 0 0.5rem; color: var(--color-heading); font-weight: 700; }
+.hint { font-size: 0.9rem; color: var(--color-text-muted); margin: 0 0 1rem; }
+.installment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+.images-section { margin-bottom: 2rem; padding: 1.5rem; background: var(--color-background-soft); border: 1px solid var(--color-border); border-radius: 12px; }
+.images-section h3 { font-size: 1.15rem; margin: 0 0 1rem; color: var(--color-heading); font-weight: 700; }
+.image-slot { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.25rem; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-background-mute); transition: border-color 0.3s ease; }
+.image-slot:hover { border-color: var(--gold-primary); }
+.image-preview { width: 160px; height: 110px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: var(--color-background); border: 1px solid var(--color-border); }
 .image-preview img { width: 100%; height: 100%; object-fit: cover; }
-.preview-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--color-text); opacity: 0.7; }
-.image-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; flex: 1; }
-.upload-btn { cursor: pointer; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); font-size: 0.9rem; }
+.preview-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--color-text-muted); }
+.image-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; flex: 1; }
+.upload-btn { cursor: pointer; padding: 0.625rem 1rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease; }
+.upload-btn:hover { border-color: var(--gold-primary); color: var(--gold-primary); }
 .upload-btn input { display: none; }
-.form-actions { margin-top: 1rem; }
+.form-actions { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border); display: flex; gap: 1rem; justify-content: flex-end; }
+.btn-cancel-form { background: var(--color-background-mute); border: 1px solid var(--color-border); color: var(--color-text); }
+.btn-cancel-form:hover { border-color: #dc3545; color: #dc3545; }
+
+/* Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 1rem;
+}
+
+.confirm-modal {
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+}
+
+.confirm-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-primary);
+}
+
+.confirm-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  margin: 0 0 1rem;
+}
+
+.confirm-message {
+  font-size: 1rem;
+  color: var(--color-text);
+  margin: 0 0 2rem;
+  line-height: 1.6;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  background: var(--color-background-mute);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-cancel:hover {
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+}
+
+.btn-confirm {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+  color: #000;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.btn-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.btn-confirm:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Modal Transitions */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .confirm-modal,
+.modal-leave-active .confirm-modal {
+  transition: transform 0.3s ease;
+}
+
+.modal-enter-from .confirm-modal,
+.modal-leave-to .confirm-modal {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .confirm-modal {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+
+  .confirm-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .confirm-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .confirm-title {
+    font-size: 1.25rem;
+  }
+
+  .confirm-message {
+    font-size: 0.95rem;
+  }
+
+  .confirm-actions {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}
 </style>

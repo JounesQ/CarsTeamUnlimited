@@ -1,47 +1,92 @@
-/* color palette from <https://github.com/vuejs/theme> */
+/* P7 Garahe Gallery - Black & Gold Theme */
 :root {
-  --vt-c-white: #ffffff;
-  --vt-c-white-soft: #f8f8f8;
-  --vt-c-white-mute: #f2f2f2;
-  --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
-  --vt-c-indigo: #2c3e50;
-  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
-  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
-  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
-  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
-  --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
-  --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+  /* Gold palette */
+  --gold-primary: #d4af37;
+  --gold-light: #f4d03f;
+  --gold-dark: #b8941e;
+  
+  /* Black palette */
+  --black-pure: #000000;
+  --black-soft: #0a0a0a;
+  --black-mute: #1a1a1a;
+  --black-lighter: #2a2a2a;
+  
+  /* White palette */
+  --white-pure: #ffffff;
+  --white-soft: #f8f8f8;
+  --white-mute: #f2f2f2;
+  --white-darker: #e5e5e5;
+  
+  /* Neutrals */
+  --gray-light: #e0e0e0;
+  --gray-mid: #b0b0b0;
+  --gray-dark: #888888;
+  --gray-darker: #333333;
 }
-:root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
+
+/* Dark Theme (Default) */
+:root,
+:root.dark,
+:root[data-theme="dark"] {
+  --color-background: var(--black-pure);
+  --color-background-soft: var(--black-soft);
+  --color-background-mute: var(--black-mute);
+  --color-border: rgba(212, 175, 55, 0.2);
+  --color-border-hover: rgba(212, 175, 55, 0.4);
+  --color-heading: var(--gold-primary);
+  --color-text: var(--gray-light);
+  --color-text-muted: var(--gray-mid);
+  --color-accent: var(--gold-primary);
+  --color-accent-hover: var(--gold-light);
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
+
+/* Light Theme */
+:root.light,
+:root[data-theme="light"] {
+  --color-background: var(--white-pure);
+  --color-background-soft: var(--white-soft);
+  --color-background-mute: var(--white-mute);
+  --color-border: rgba(212, 175, 55, 0.3);
+  --color-border-hover: rgba(212, 175, 55, 0.5);
+  --color-heading: var(--gold-dark);
+  --color-text: var(--gray-darker);
+  --color-text-muted: var(--gray-dark);
+  --color-accent: var(--gold-primary);
+  --color-accent-hover: var(--gold-dark);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; font-weight: normal; }
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
 body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
   line-height: 1.6;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--black-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--black-lighter);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.3);
 }

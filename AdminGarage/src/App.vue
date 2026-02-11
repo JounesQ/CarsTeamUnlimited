@@ -1,34 +1,226 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { useTheme } from '@/composables/useTheme'
+
+const { theme, toggleTheme } = useTheme()
 </script>
 
 <template>
   <div class="app-wrap">
     <header class="site-header">
-      <RouterLink to="/vehicles" class="logo">Garage Admin</RouterLink>
-      <nav>
-        <RouterLink to="/vehicles">Vehicles</RouterLink>
-        <RouterLink to="/vehicles/new">Add vehicle</RouterLink>
+      <RouterLink to="/vehicles" class="logo">
+        <img src="/p7-logo.png" alt="P7 Garahe Gallery" class="logo-img" />
+        <div class="logo-text">
+          <span class="logo-brand">P7 GARAHE GALLERY</span>
+          <span class="logo-subtitle">Admin Panel</span>
+        </div>
+      </RouterLink>
+      <nav class="nav">
+        <RouterLink to="/vehicles" class="nav-link">Vehicles</RouterLink>
+        <RouterLink to="/vehicles/new" class="nav-link">Add Vehicle</RouterLink>
+        <button @click="toggleTheme" class="theme-toggle" :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+          <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
       </nav>
     </header>
     <main class="main">
       <RouterView />
     </main>
+    <footer class="site-footer">
+      <p>&copy; 2024 P7 Garahe Gallery Admin. All rights reserved.</p>
+    </footer>
   </div>
 </template>
 
 <style scoped>
-.app-wrap { min-height: 100vh; display: flex; flex-direction: column; }
-.site-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 1rem 2rem; border-bottom: 1px solid var(--color-border);
-  background: var(--color-background-soft);
+.app-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
 }
-.logo { font-weight: 700; font-size: 1.25rem; color: var(--color-heading); text-decoration: none; }
-.logo:hover { color: hsla(160, 100%, 37%, 1); }
-nav { display: flex; gap: 1rem; }
-nav a { padding: 0.5rem 0.75rem; text-decoration: none; color: var(--color-text); border-radius: 6px; }
-nav a:hover { background: var(--color-background-mute); }
-nav a.router-link-active { color: hsla(160, 100%, 37%, 1); font-weight: 500; }
-.main { flex: 1; padding: 0 1rem 2rem; }
+
+/* Header */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 3rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background-soft);
+  transition: all 0.3s ease;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.02);
+}
+
+.logo-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.logo-brand {
+  font-weight: 900;
+  font-size: 1.15rem;
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+}
+
+.logo-subtitle {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  padding: 0.625rem 1.25rem;
+  text-decoration: none;
+  color: var(--color-text);
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--gold-primary);
+}
+
+.nav-link:hover::after {
+  width: 60%;
+}
+
+.nav-link.router-link-active {
+  color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.nav-link.router-link-active::after {
+  width: 60%;
+}
+
+.theme-toggle {
+  padding: 0.625rem;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  color: var(--gold-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.theme-toggle:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--gold-primary);
+  transform: scale(1.05);
+}
+
+.theme-toggle svg {
+  display: block;
+}
+
+.main {
+  flex: 1;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 180px);
+}
+
+/* Footer */
+.site-footer {
+  padding: 1.5rem 2rem;
+  background: var(--color-background-soft);
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .site-header {
+    padding: 1rem 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .logo-brand {
+    font-size: 1rem;
+  }
+
+  .logo-img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .main {
+    padding: 1.5rem 1rem;
+  }
+}
 </style>
