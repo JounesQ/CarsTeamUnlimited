@@ -36,7 +36,7 @@ class VehicleController extends Controller
             $query->where('fuel_type', $request->fuel_type);
         }
 
-        $perPage = max(1, min(50, (int) $request->get('per_page', 12)));
+        $perPage = max(1, min(500, (int) $request->get('per_page', 500)));
         return $query->paginate($perPage);
     }
 

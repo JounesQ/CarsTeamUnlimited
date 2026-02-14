@@ -136,13 +136,15 @@ function closeModal() {
 }
 
 async function load() {
-  const params: Record<string, string | number> = {}
+  const params: Record<string, string | number> = { per_page: 500 }
   if (make.value) params.make = make.value
   if (vehicleType.value) params.vehicle_type = vehicleType.value
   if (category.value) params.category = category.value
   if (fuelType.value) params.fuel_type = fuelType.value
+  if (year.value != null) params.year = year.value
+  if (minPrice.value != null) params.min_price = minPrice.value
+  if (maxPrice.value != null) params.max_price = maxPrice.value
 
-  
   await cachedVehicles.load({
     params,
     onError: (e) => {
@@ -177,7 +179,9 @@ watch(() => route.query, (q) => {
   vehicleType.value = (q.vehicle_type as string) || ''
   category.value = (q.category as string) || ''
   fuelType.value = (q.fuel_type as string) || ''
- 
+  year.value = q.year ? Number(q.year) : undefined
+  minPrice.value = q.min_price ? Number(q.min_price) : undefined
+  maxPrice.value = q.max_price ? Number(q.max_price) : undefined
   load()
 })
 </script>
@@ -238,6 +242,7 @@ watch(() => route.query, (q) => {
       <Transition name="modal">
         <div v-if="modalOpen" class="modal-overlay" @click.self="closeModal">
           <div class="modal-box" @click.stop>
+            <button type="button" class="modal-close-btn" aria-label="Close" @click="closeModal">×</button>
             <p v-if="modalError" class="modal-error">{{ modalError }}</p>
             <template v-else-if="modalVehicle">
               <div class="modal-header">
@@ -329,9 +334,9 @@ watch(() => route.query, (q) => {
 </template>
 
 <style scoped>
-.vehicle-list { padding: 2rem 1rem; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
+.vehicle-list { padding: 2rem 0; margin: 0; max-width: 100%; min-height: 100vh; }
 h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-weight: 700; }
-.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--color-background-soft); border: 1px solid var(--color-border); border-radius: 12px; }
+.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; padding: 1.5rem 0; background: var(--color-background-soft); border: 0 solid var(--color-border); border-radius: 0; border-top-width: 1px; border-bottom-width: 1px; }
 .filter-inp { padding: 0.625rem 0.875rem; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background); color: var(--color-text); width: 140px; transition: border-color 0.3s ease; }
 .filter-inp:focus { outline: none; border-color: var(--gold-primary); }
 .btn { padding: 0.625rem 1.25rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background-mute); color: var(--color-text); cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
@@ -339,7 +344,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-primary { background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; border-color: transparent; font-weight: 600; }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4); }
-.loading, .empty { text-align: center; padding: 3rem; color: var(--color-text); font-size: 1.1rem; }
+.loading, .empty { text-align: center; padding: 3rem 0; color: var(--color-text); font-size: 1.1rem; }
 
 /* Vehicles grouped by make */
 .vehicles-by-make { display: flex; flex-direction: column; gap: 3rem; }
@@ -408,6 +413,31 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   scrollbar-width: thin;
   scrollbar-color: var(--black-lighter) var(--black-soft);
 }
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-background-mute);
+  color: var(--color-text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.modal-close-btn:hover {
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.1);
+}
 .modal-box::-webkit-scrollbar {
   width: 8px;
 }
@@ -422,7 +452,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   background: rgba(212, 175, 55, 0.3);
 }
 .modal-error { padding: 2rem; text-align: center; color: #ff6b6b; }
-.modal-header { padding: 1.5rem 2rem 1rem; border-bottom: 1px solid var(--color-border); }
+.modal-header { padding: 1.5rem 3.5rem 1rem 2rem; border-bottom: 1px solid var(--color-border); }
 .modal-header h2 { font-size: 1.5rem; margin: 0 0 0.5rem; color: var(--color-text); font-weight: 700; }
 .modal-price { font-size: 1.35rem; font-weight: 700; margin: 0; color: var(--gold-primary); }
 .neg { font-weight: normal; opacity: 0.8; font-size: 0.9rem; color: var(--color-text-muted); }
@@ -501,13 +531,13 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .vehicle-list {
-    padding: 1rem 0.75rem 0 0.75rem;
+    padding: 1rem 0 0 0;
   }
 
   h1 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    padding: 0 0.5rem;
+    padding: 0;
   }
 
   /* Hide filters by default on mobile */
@@ -567,14 +597,23 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   .make-title::before,
   .make-title::after {
-    display: none;
+    width: 40px;
+    height: 2px;
+  }
+
+  .make-title::before {
+    right: calc(50% + 52px);
+  }
+
+  .make-title::after {
+    left: calc(50% + 52px);
   }
 
   /* 2 Column Grid for Mobile */
   .grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
-    padding: 0 0.5rem;
+    padding: 0;
   }
 
   .card {
@@ -587,6 +626,12 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   .card-body {
     padding: 0.75rem;
+  }
+
+  .card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
   }
 
   .card-title {
@@ -606,7 +651,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   .loading,
   .empty {
-    padding: 2rem 1rem;
+    padding: 2rem 0;
     font-size: 1rem;
   }
 
@@ -621,7 +666,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .modal-header {
-    padding: 1rem 1.25rem 0.75rem;
+    padding: 1rem 3rem 0.75rem 1.25rem;
   }
 
   .modal-header h2 {

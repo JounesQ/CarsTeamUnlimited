@@ -46,7 +46,7 @@ function formatPrice(n: number) {
 async function load(page = 1) {
   loading.value = true
   try {
-    const params: Record<string, string | number> = { page, per_page: 15 }
+    const params: Record<string, string | number> = { page, per_page: 5 }
     if (statusFilter.value) params.status = statusFilter.value
     if (makeFilter.value) params.make = makeFilter.value
     const res = await api.admin.getVehicles(params) as Paginated<Vehicle>

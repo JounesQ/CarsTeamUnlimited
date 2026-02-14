@@ -128,7 +128,7 @@ class VehicleController extends Controller
             'financing_options' => 'nullable|array',
             'images' => 'nullable|array',
             'images.*.image_path' => 'required_with:images|string|max:255',
-            'images.*.position' => 'nullable|integer|min:1|max:4',
+            'images.*.position' => 'nullable|integer|min:1|max:10',
             'images.*.is_primary' => 'nullable|boolean',
         ]);
     }
@@ -162,7 +162,7 @@ class VehicleController extends Controller
 
         foreach (array_values($images) as $i => $img) {
             $position = (int) ($img['position'] ?? $i + 1);
-            $position = max(1, min(4, $position));
+            $position = max(1, min(50, $position));
             $path = $img['image_path'] ?? '';
             // If frontend sends full URL (e.g. from asset()), store only the path after /storage/
             if (str_starts_with($path, 'http')) {
