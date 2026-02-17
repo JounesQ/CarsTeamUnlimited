@@ -5,6 +5,9 @@ import { computed, ref, provide } from 'vue'
 const route = useRoute()
 const isHomePage = computed(() => route.path === '/')
 const isVehiclesPage = computed(() => route.path === '/vehicles')
+const isAboutPage = computed(() => route.path === '/about')
+
+const showMobileFooter = computed(() => isHomePage.value || isAboutPage.value)
 
 const showMobileFilters = ref(false)
 provide('showMobileFilters', showMobileFilters)
@@ -66,6 +69,9 @@ const toggleMobileFilters = () => {
     </nav>
     
     <footer class="site-footer desktop-footer">
+      <p>&copy; 2026 P7 Garahe Gallery. All rights reserved.</p>
+    </footer>
+    <footer v-if="showMobileFooter" class="site-footer mobile-footer">
       <p>&copy; 2026 P7 Garahe Gallery. All rights reserved.</p>
     </footer>
   </div>
@@ -232,6 +238,12 @@ const toggleMobileFilters = () => {
   /* Hide desktop footer on mobile */
   .desktop-footer {
     display: none;
+  }
+  
+  .mobile-footer {
+    display: block;
+    padding: 1rem 1.25rem 0.75rem;
+    font-size: 0.8rem;
   }
 
   .main {

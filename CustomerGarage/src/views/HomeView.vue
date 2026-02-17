@@ -121,6 +121,27 @@ const router = useRouter()
                 <h3>Phone</h3>
                 <p>+63 955 213 4607</p>
                 <p>+63 966 411 8317</p>
+                <div class="social-links">
+                  <span class="social-label">You may also connect with us via:</span>
+                  <div class="social-buttons">
+                    <a
+                      href="https://www.facebook.com/michaeltiposo12"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="social-link"
+                    >
+                      <span>Facebook</span>
+                    </a>
+                    <a
+                      href="https://m.me/p7garahe"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="social-link"
+                    >
+                      <span>Messenger</span>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="info-item">
@@ -132,7 +153,7 @@ const router = useRouter()
               </div>
               <div class="info-content">
                 <h3>Business Hours</h3>
-                <p>Open 24 Hours<br>7 Days a Week</p>
+                <p>8:00 AM – 7:00 PM<br>Monday to Sunday</p>
               </div>
             </div>
           </div>
@@ -245,6 +266,45 @@ const router = useRouter()
 
 .cta-primary:hover svg {
   transform: translateX(4px);
+}
+
+.social-links {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.social-label {
+  font-size: 0.85rem;
+  color: #cccccc;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: #f4d03f;
+  font-size: 0.85rem;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: rgba(212, 175, 55, 0.08);
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  border-color: #f4d03f;
+  background: rgba(244, 208, 63, 0.15);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
 }
 
 /* Features Section */
@@ -388,7 +448,7 @@ const router = useRouter()
 
 .location-map {
   width: 100%;
-  height: 500px;
+  height: 550px;
   border-radius: 16px;
   overflow: hidden;
   border: 2px solid rgba(212, 175, 55, 0.2);
