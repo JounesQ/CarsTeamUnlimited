@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, inject } from 'vue'
 import { useRoute } from 'vue-router'
-import { api, imageUrl } from '@/api/client'
+import { imageUrl } from '@/api/client'
 import type { Vehicle } from '@/types/vehicle'
 import { MAKES, VEHICLE_TYPES, CATEGORIES, FUEL_TYPES } from '@/data/vehicleOptions'
-import { useCachedVehicles } from '@/composables/useCachedApi'
+import { useCachedVehicles, getCachedVehicle } from '@/composables/useCachedApi'
 
 const route = useRoute()
 const cachedVehicles = useCachedVehicles()
@@ -110,8 +110,8 @@ async function openModal(id: string) {
   carouselIndex.value = 0
   selectedTerm.value = null
   try {
-    // Fetch data first before opening modal
-    const vehicleData = await api.getVehicle(id)
+    // Fetch data (with caching) before opening modal
+    const vehicleData = await getCachedVehicle(id)
     modalVehicle.value = vehicleData
     modalOpen.value = true
     // start carousel on primary image if exists

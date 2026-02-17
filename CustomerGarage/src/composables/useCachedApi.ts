@@ -96,12 +96,42 @@ export function useCachedVehicles() {
 }
 
 /**
- * Fetch single vehicle without caching (detail views change less frequently)
- * You can add caching here too if needed
+ * Fetch single vehicle **with caching** for offline-ready detail views.
+ *
+ * Behavior:
+ * - If cached detail exists → return it immediately (works offline).
+ * - In background, try to fetch fresh detail and update cache (stale-while-revalidate).
+ * - If nothing cached and API fetch fails → throw error (same as before).
  */
 export async function getCachedVehicle(id: string): Promise<Vehicle> {
-  // For now, just pass through to API
-  // Individual vehicle details are less critical to cache
-  // since they're fetched on-demand when user clicks
-  return api.getVehicle(id)
+  const endpoint = 'vehicle_detail'
+  const params = { id }
+
+  // Step 1: Try to read from cache first for instant/offline load
+  const cached = getCache<Vehicle>(endpoint, params)
+  if (cached) {
+    // Fire-and-forget background refresh to keep cache fresh
+    api.getVehicle(id)
+      .then((fresh) => {
+        try {
+          setCache(endpoint, fresh, params)
+        } catch (err) {
+          console.warn('Failed to update vehicle detail cache:', err)
+        }
+      })
+      .catch((err) => {
+        // Network/API error - keep using cached data silently
+        console.warn('Failed to refresh vehicle detail, using cached data:', err)
+      })
+
+    return cached
+  }
+
+  // Step 2: No cache available - fetch from API (online-only path)
+  const fresh = await api.getVehicle(id)
+
+  // Step 3: Save to cache for future offline use
+  setCache(endpoint, fresh, params)
+
+  return fresh
 }
