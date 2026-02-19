@@ -28,7 +28,9 @@ return [
         'http://192.168.1.19:5174'
         ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://.*\.vercel\.app$#',
+    ],
 
     'allowed_headers' => ['*'],
 
