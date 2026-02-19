@@ -1,0 +1,8 @@
+{
+    "$schema": "https://schema.railpack.com",
+    "steps": {
+      "install:composer": {
+        "commands": ["composer install --optimize-autoloader --no-scripts --no-interaction --no-dev"]
+      }
+    }
+  }
