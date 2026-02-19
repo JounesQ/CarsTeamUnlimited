@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { api, imageUrl } from '@/api/client'
-import type { Vehicle, Paginated } from '@/types/vehicle'
+import type { Vehicle, VehicleForm, Paginated } from '@/types/vehicle'
 import { MAKES } from '@/data/vehicleOptions'
 
 const router = useRouter()
@@ -107,20 +107,45 @@ async function handleConfirm() {
   }
 }
 
+function vehicleToForm(v: Vehicle): VehicleForm {
+  return {
+    title: v.title,
+    slug: v.slug,
+    status: v.status,
+    year: v.year,
+    make: v.make,
+    model: v.model,
+    vehicle_type: v.vehicle_type,
+    category: v.category ?? '',
+    transmission: v.transmission,
+    fuel_type: v.fuel_type ?? '',
+    color: v.color ?? '',
+    door_count: v.door_count ?? '',
+    seat_capacity: v.seat_capacity ?? '',
+    mileage: v.mileage ?? '',
+    grade: v.grade ?? '',
+    price: v.price,
+    is_negotiable: v.is_negotiable,
+    down_payment: v.down_payment ?? '',
+    dp_all_in: v.dp_all_in,
+    financing_options: v.financing_options ?? {},
+    images: v.images?.map((i) => ({ image_path: i.image_path, position: i.position, is_primary: i.is_primary })) ?? [],
+  }
+}
+
 async function executeStatusChange() {
   if (!selectedVehicle.value) return
   
   confirmModalLoading.value = true
   try {
-    await api.admin.updateVehicle(selectedVehicle.value.id, {
-      ...selectedVehicle.value,
-      status: newStatus.value,
-    })
+    const formData: VehicleForm = { ...vehicleToForm(selectedVehicle.value), status: newStatus.value }
+    await api.admin.updateVehicle(selectedVehicle.value.id, formData)
     
     // Update local data
     const index = vehicles.value.findIndex(v => v.id === selectedVehicle.value!.id)
-    if (index !== -1) {
-      vehicles.value[index].status = newStatus.value
+    const item = index !== -1 ? vehicles.value[index] : undefined
+    if (item) {
+      item.status = newStatus.value
       selectedVehicle.value.status = newStatus.value
     }
     
