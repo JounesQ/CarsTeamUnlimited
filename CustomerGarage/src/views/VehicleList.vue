@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed, inject } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { imageUrl } from '@/api/client'
 import type { Vehicle } from '@/types/vehicle'
@@ -114,6 +114,9 @@ async function openModal(id: string) {
     const vehicleData = await getCachedVehicle(id)
     modalVehicle.value = vehicleData
     modalOpen.value = true
+    // Push history so browser Back closes modal instead of leaving the page
+    const url = window.location.pathname + window.location.search
+    window.history.pushState({ vehicleModal: true }, '', url)
     // start carousel on primary image if exists
     const primaryIdx = orderedImages.value.findIndex((i) => i.is_primary)
     if (primaryIdx >= 0) carouselIndex.value = primaryIdx
@@ -133,6 +136,18 @@ function closeModal() {
   modalOpen.value = false
   modalVehicle.value = null
   selectedTerm.value = null
+}
+
+// When user presses browser Back while modal is open, close modal and stay on VehicleList
+function onPopState() {
+  if (modalOpen.value) {
+    closeModal()
+  }
+}
+
+// Close via X or overlay: go back so the state we pushed is removed; popstate will then call closeModal()
+function handleCloseModal() {
+  window.history.back()
 }
 
 async function load() {
@@ -160,7 +175,7 @@ async function load() {
   }
 }
 
-function search() {
+function applyFilters() {
   const q: Record<string, string> = {}
   if (make.value) q.make = make.value
   if (vehicleType.value) q.vehicle_type = vehicleType.value
@@ -173,7 +188,15 @@ function search() {
   load()
 }
 
-onMounted(() => load())
+onMounted(() => {
+  load()
+  window.addEventListener('popstate', onPopState)
+})
+onUnmounted(() => {
+  window.removeEventListener('popstate', onPopState)
+})
+
+// Sync filters from URL (e.g. back/forward, direct link); applyFilters() will run via ref watch and load
 watch(() => route.query, (q) => {
   make.value = (q.make as string) || ''
   vehicleType.value = (q.vehicle_type as string) || ''
@@ -182,8 +205,12 @@ watch(() => route.query, (q) => {
   year.value = q.year ? Number(q.year) : undefined
   minPrice.value = q.min_price ? Number(q.min_price) : undefined
   maxPrice.value = q.max_price ? Number(q.max_price) : undefined
-  load()
-})
+}, { immediate: false })
+
+// Auto-search when any filter changes (no Search button click needed)
+watch([make, vehicleType, category, fuelType, year, minPrice, maxPrice], () => {
+  applyFilters()
+}, { deep: true })
 </script>
 
 <template>
@@ -207,10 +234,41 @@ watch(() => route.query, (q) => {
         <option v-for="f in FUEL_TYPES" :key="f" :value="f">{{ f }}</option>
       </select>
      
-      <button type="button" class="btn btn-primary" @click="search">Search</button>
     </div>
-    <div v-if="cachedVehicles.loading.value" class="loading">Loading…</div>
-    
+    <!-- Skeleton loading (first load) -->
+    <div v-if="cachedVehicles.loading.value && !cachedVehicles.data.value" class="vehicles-by-make skeleton-loading">
+      <div class="make-section">
+        <div class="make-title skeleton-title"></div>
+        <ul class="grid">
+          <li v-for="i in 8" :key="i" class="card skeleton-card">
+            <div class="card-img-wrap skeleton-img"></div>
+            <div class="card-body">
+              <div class="skeleton-line skeleton-title-line"></div>
+              <div class="card-footer">
+                <div class="skeleton-line skeleton-price"></div>
+                <div class="skeleton-badge"></div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="make-section">
+        <div class="make-title skeleton-title"></div>
+        <ul class="grid">
+          <li v-for="i in 4" :key="'b' + i" class="card skeleton-card">
+            <div class="card-img-wrap skeleton-img"></div>
+            <div class="card-body">
+              <div class="skeleton-line skeleton-title-line"></div>
+              <div class="card-footer">
+                <div class="skeleton-line skeleton-price"></div>
+                <div class="skeleton-badge"></div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <!-- Grouped by Make -->
     <div v-if="!cachedVehicles.loading.value && vehicles.length > 0" class="vehicles-by-make">
       <div v-for="group in vehiclesByMake" :key="group.make" class="make-section">
@@ -234,15 +292,16 @@ watch(() => route.query, (q) => {
     </div>
     
     <div v-if="!cachedVehicles.loading.value && vehicles.length === 0" class="empty">
-      {{ cachedVehicles.error.value || 'Loading . . .' }}
+      {{ cachedVehicles.error.value || 'No Vehicle Available' }}
     </div>
 
     <!-- Vehicle detail modal -->
     <Teleport to="body">
       <Transition name="modal">
-        <div v-if="modalOpen" class="modal-overlay" @click.self="closeModal">
+        <div v-if="modalOpen" class="modal-overlay" @click.self="handleCloseModal">
           <div class="modal-box" @click.stop>
-            <button type="button" class="modal-close-btn" aria-label="Close" @click="closeModal">×</button>
+            <div class="modal-logo-bg" area-hidden="true"></div>
+            <button type="button" class="modal-close-btn" area-label="Close" @click="handleCloseModal">×</button>
             <p v-if="modalError" class="modal-error">{{ modalError }}</p>
             <template v-else-if="modalVehicle">
               <div class="modal-header">
@@ -257,7 +316,7 @@ watch(() => route.query, (q) => {
                     v-if="orderedImages.length > 1"
                     type="button"
                     class="carousel-btn prev"
-                    aria-label="Previous photo"
+                    area-label="Previous photo"
                     @click="prevImage"
                   >
                     ‹
@@ -266,7 +325,7 @@ watch(() => route.query, (q) => {
                     v-if="orderedImages.length > 1"
                     type="button"
                     class="carousel-btn next"
-                    aria-label="Next photo"
+                    area-label="Next photo"
                     @click="nextImage"
                   >
                     ›
@@ -280,13 +339,14 @@ watch(() => route.query, (q) => {
                     class="thumb-btn"
                     :class="{ active: idx === carouselIndex }"
                     @click="setCarouselIndex(idx)"
-                    :aria-label="`View photo ${idx + 1}`"
+                    :area-label="`View photo ${idx + 1}`"
                   >
                     <img :src="imageUrl(img.image_path)" :alt="`${modalVehicle.title} ${img.position}`" class="modal-thumb" />
                   </button>
                 </div>
               </div>
               <div class="modal-specs">
+                <div class="modal-details-logo-bg" area-hidden="true"></div>
                 <h3>Details</h3>
                 <dl>
                   <dt>Year</dt><dd>{{ modalVehicle.year }}</dd>
@@ -342,9 +402,78 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .btn { padding: 0.625rem 1.25rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background-mute); color: var(--color-text); cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
 .btn:hover { border-color: var(--gold-primary); color: var(--gold-primary); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary { background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; border-color: transparent; font-weight: 600; }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4); }
+
 .loading, .empty { text-align: center; padding: 3rem 0; color: var(--color-text); font-size: 1.1rem; }
+
+/* Skeleton loading */
+.skeleton-loading .skeleton-card {
+  cursor: default;
+  pointer-events: none;
+}
+.skeleton-loading .skeleton-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+.skeleton-img,
+.skeleton-title,
+.skeleton-line,
+.skeleton-badge {
+  background: linear-gradient(90deg, var(--color-background-mute) 25%, var(--color-border) 50%, var(--color-background-mute) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  border-radius: 6px;
+}
+.skeleton-title {
+  height: 1.75rem;
+  width: 140px;
+  margin: 0 auto 2rem;
+}
+.skeleton-img {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+.skeleton-title-line {
+  height: 1.05rem;
+  width: 85%;
+  margin-bottom: 0.5rem;
+}
+.skeleton-price {
+  height: 1.25rem;
+  width: 5rem;
+}
+.skeleton-badge {
+  height: 1.5rem;
+  width: 4.5rem;
+  border-radius: 6px;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Filter skeleton */
+.filters-skeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.skeleton-filter-inp,
+.skeleton-filter-btn {
+  background: linear-gradient(90deg, var(--color-background-mute) 25%, var(--color-border) 50%, var(--color-background-mute) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  border-radius: 8px;
+}
+.skeleton-filter-inp {
+  width: 140px;
+  height: 2.5rem;
+}
+.skeleton-filter-btn {
+  width: 6rem;
+  height: 2.5rem;
+}
 
 /* Vehicles grouped by make */
 .vehicles-by-make { display: flex; flex-direction: column; gap: 3rem; }
@@ -413,6 +542,22 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   scrollbar-width: thin;
   scrollbar-color: var(--black-lighter) var(--black-soft);
 }
+.modal-logo-bg {
+  display: none;
+}
+.modal-specs {
+  overflow: hidden;
+}
+.modal-details-logo-bg {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url('/p7-logo.png?v=3') center center no-repeat;
+  background-size: 100% auto;
+  opacity: 0.02;
+  pointer-events: none;
+}
 .modal-close-btn {
   position: absolute;
   top: 1rem;
@@ -451,12 +596,12 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .modal-box::-webkit-scrollbar-thumb:hover {
   background: rgba(212, 175, 55, 0.3);
 }
-.modal-error { padding: 2rem; text-align: center; color: #ff6b6b; }
-.modal-header { padding: 1.5rem 3.5rem 1rem 2rem; border-bottom: 1px solid var(--color-border); }
+.modal-error { position: relative; z-index: 1; padding: 2rem; text-align: center; color: #ff6b6b; }
+.modal-header { position: relative; z-index: 1; padding: 1.5rem 3.5rem 1rem 2rem; border-bottom: 1px solid var(--color-border); }
 .modal-header h2 { font-size: 1.5rem; margin: 0 0 0.5rem; color: var(--color-text); font-weight: 700; }
 .modal-price { font-size: 1.35rem; font-weight: 700; margin: 0; color: var(--gold-primary); }
 .neg { font-weight: normal; opacity: 0.8; font-size: 0.9rem; color: var(--color-text-muted); }
-.modal-gallery { padding: 1.5rem 2rem; }
+.modal-gallery { position: relative; z-index: 1; padding: 1.5rem 2rem; }
 .modal-main-img {
   position: relative;
   border-radius: 12px;
@@ -507,7 +652,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .thumb-btn:hover { border-color: rgba(212, 175, 55, 0.5); }
 .thumb-btn.active { border-color: var(--gold-primary); }
 .modal-thumb { width: 80px; height: 56px; object-fit: cover; border-radius: 8px; display: block; }
-.modal-specs, .modal-financing { padding: 1.5rem 2rem; border-top: 1px solid var(--color-border); }
+.modal-specs, .modal-financing { position: relative; z-index: 1; padding: 1.5rem 2rem; border-top: 1px solid var(--color-border); }
 .modal-specs h3, .modal-financing h3 { font-size: 1.1rem; margin: 0 0 1rem; color: var(--gold-primary); font-weight: 700; }
 .modal-specs dl, .modal-financing p { margin: 0; font-size: 0.95rem; }
 .modal-specs dl { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 2rem; }
@@ -527,6 +672,15 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .modal-enter-from, .modal-leave-to { opacity: 0; }
 .modal-enter-active .modal-box, .modal-leave-active .modal-box { transition: transform 0.2s ease; }
 .modal-enter-from .modal-box, .modal-leave-to .modal-box { transform: scale(0.95); }
+
+/* Desktop: details content above logo */
+@media (min-width: 769px) {
+  .modal-specs h3,
+  .modal-specs dl {
+    position: relative;
+    z-index: 1;
+  }
+}
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
@@ -562,6 +716,30 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
   }
 
+  /* Filter skeleton: always visible on first load (mobile) */
+  .filters.filters-skeleton {
+    display: flex;
+    position: static;
+    margin-bottom: 2rem;
+    padding: 1.5rem 0;
+    border-radius: 0;
+    border: 0 solid var(--color-border);
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    box-shadow: none;
+  }
+
+  .filters-skeleton .skeleton-filter-inp {
+    width: calc(50% - 0.325rem);
+    height: 2.75rem;
+  }
+
+  .filters-skeleton .skeleton-filter-btn {
+    width: 100%;
+    height: 2.75rem;
+    margin-top: 0.25rem;
+  }
+
   /* Show filters when toggled */
   .filters.mobile-filters-open {
     display: flex;
@@ -573,12 +751,6 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
     font-size: 0.9rem;
   }
 
-  .btn-primary {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    font-size: 1rem;
-    margin-top: 0.25rem;
-  }
 
   /* Make sections on mobile */
   .vehicles-by-make {
@@ -712,6 +884,12 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   .modal-specs h3,
   .modal-financing h3 {
     font-size: 1rem;
+  }
+
+  .modal-specs h3,
+  .modal-specs dl {
+    position: relative;
+    z-index: 1;
   }
 
   .modal-specs dl {

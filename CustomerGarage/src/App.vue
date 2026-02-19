@@ -206,6 +206,11 @@ const toggleMobileFilters = () => {
   margin: 0;
 }
 
+/* Hide mobile footer on desktop (only show inside media query) */
+.mobile-footer {
+  display: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .app-wrap {
