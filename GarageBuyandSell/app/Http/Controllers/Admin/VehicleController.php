@@ -76,7 +76,8 @@ class VehicleController extends Controller
     }
 
     /**
-     * Upload an image file; returns storage path for use in vehicle images.
+     * Upload an image file; returns storage path or full URL for use in vehicle images.
+     * Uses Supabase when configured, otherwise public disk.
      */
     public function uploadImage(Request $request)
     {
@@ -84,7 +85,13 @@ class VehicleController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
         $file = $request->file('image');
-        $path = $file->store('vehicles', 'public');
+        $disk = config('filesystems.disks.supabase.key') ? 'supabase' : 'public';
+        $path = $file->store('vehicles', $disk);
+
+        if ($disk === 'supabase') {
+            $path = Storage::disk('supabase')->getAdapter()->getPublicUrl($path);
+        }
+
         return response()->json(['path' => $path]);
     }
 
@@ -164,13 +171,12 @@ class VehicleController extends Controller
             $position = (int) ($img['position'] ?? $i + 1);
             $position = max(1, min(50, $position));
             $path = $img['image_path'] ?? '';
-            // If frontend sends full URL (e.g. from asset()), store only the path after /storage/
+            // If frontend sends full URL (Supabase or external), store as-is
             if (str_starts_with($path, 'http')) {
-                $parsed = parse_url($path);
-                $path = $parsed['path'] ?? $path;
-                if (str_contains($path, '/storage/')) {
-                    $path = substr($path, strpos($path, '/storage/') + strlen('/storage/'));
-                }
+                // Keep full URL for Supabase/external storage
+            } elseif (str_contains($path, '/storage/')) {
+                // Laravel public disk: extract path after /storage/
+                $path = substr($path, strpos($path, '/storage/') + strlen('/storage/'));
             }
             if ($path === '') {
                 continue;

@@ -24,6 +24,9 @@ class VehicleImage extends Model
     /** Full URL for display (e.g. in server-side views). API returns raw path; frontend builds URL. */
     public function getImageUrlAttribute(): string
     {
+        if (str_starts_with($this->image_path, 'http')) {
+            return $this->image_path;
+        }
         return asset('storage/' . $this->image_path);
     }
 }
