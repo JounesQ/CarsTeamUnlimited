@@ -50,7 +50,7 @@ async function load(page = 1) {
     if (statusFilter.value) params.status = statusFilter.value
     if (makeFilter.value) params.make = makeFilter.value
     const res = await api.admin.getVehicles(params) as Paginated<Vehicle>
-    vehicles.value = res.data
+    vehicles.value = Array.isArray(res?.data) ? res.data : []
     pagination.value = { current_page: res.current_page, last_page: res.last_page, per_page: res.per_page, total: res.total }
   } catch (e) {
     console.error(e)
@@ -222,7 +222,6 @@ onMounted(() => load(1))
         <option value="available">Available</option>
         <option value="sold">Sold</option>
         <option value="reserved">Reserved</option>
-        <option value="draft">Draft</option>
         <option value="coming">Coming</option>
       </select>
       <select v-model="makeFilter" class="filter-inp">
@@ -423,7 +422,10 @@ onMounted(() => load(1))
 </template>
 
 <style scoped>
-.admin-list { max-width: 1200px; margin: 0 auto; padding: 2rem 0; }
+.admin-list { max-width: 1200px; margin: 0 auto; padding: 2rem 0; width: 100%; }
+@media (min-width: 769px) {
+  .admin-list { max-width: none; }
+}
 .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .admin-header h1 { font-size: 2rem; margin: 0; color: var(--color-heading); font-weight: 700; }
 .filters { display: flex; gap: 0.75rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--color-background-soft); border: 1px solid var(--color-border); border-radius: 12px; flex-wrap: wrap; }
@@ -677,21 +679,69 @@ onMounted(() => load(1))
 
 /* Responsive */
 @media (max-width: 768px) {
-  .modal-box {
-    max-width: 100%;
-    margin: 0.5rem;
+  .admin-list {
+    max-width: none;
+    padding: 0.25rem 0;
   }
 
-  .modal-header {
-    padding: 1rem 1.25rem;
+  .admin-header {
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
-  .modal-header h2 {
+  .admin-header h1 {
     font-size: 1.25rem;
   }
 
+  .filters {
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .filter-inp {
+    width: 100%;
+    min-width: 100px;
+  }
+
+  .table-wrap {
+    margin: 0 -0.25rem;
+    border-radius: 8px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .cell-img {
+    width: 50px;
+    height: 36px;
+  }
+
+  .pagination {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0;
+    gap: 0.75rem;
+  }
+
+  .modal-box {
+    max-width: 100%;
+    margin: 0.25rem;
+  }
+
+  .modal-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+
   .modal-body {
-    padding: 1.25rem;
+    padding: 1rem;
   }
 
   .modal-image {

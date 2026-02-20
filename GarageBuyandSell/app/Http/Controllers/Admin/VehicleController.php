@@ -50,6 +50,50 @@ class VehicleController extends Controller
     }
 
     /**
+     * Get vehicle statistics for admin dashboard.
+     */
+    public function stats()
+    {
+        $total = Vehicle::count();
+        $byStatus = Vehicle::selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
+        $available = (int) ($byStatus['available'] ?? 0);
+        $sold = (int) ($byStatus['sold'] ?? 0);
+        $reserved = (int) ($byStatus['reserved'] ?? 0);
+        $coming = (int) ($byStatus['coming'] ?? 0);
+
+        $totalValueAll = (float) Vehicle::sum('price');
+        $totalValueAvailable = (float) Vehicle::where('status', 'available')->sum('price');
+        $totalValueSold = (float) Vehicle::where('status', 'sold')->sum('price');
+        $totalValueReserved = (float) Vehicle::where('status', 'reserved')->sum('price');
+        $totalValueComing = (float) Vehicle::where('status', 'coming')->sum('price');
+        $byMake = Vehicle::selectRaw('make, count(*) as count')
+            ->groupBy('make')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()
+            ->map(fn ($r) => ['make' => $r->make, 'count' => (int) $r->count])
+            ->toArray();
+
+        return response()->json([
+            'total' => $total,
+            'available' => $available,
+            'sold' => $sold,
+            'reserved' => $reserved,
+            'coming' => $coming,
+            'total_value' => $totalValueAvailable,
+            'total_value_all' => $totalValueAll,
+            'total_value_sold' => $totalValueSold,
+            'total_value_reserved' => $totalValueReserved,
+            'total_value_coming' => $totalValueComing,
+            'by_make' => $byMake,
+        ]);
+    }
+
+    /**
      * Show a single vehicle (admin).
      */
     public function show(string $id)

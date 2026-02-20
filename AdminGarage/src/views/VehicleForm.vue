@@ -329,7 +329,10 @@ onMounted(() => loadVehicle())
 </template>
 
 <style scoped>
-.admin-form { max-width: 800px; margin: 0 auto; padding: 2rem 0; }
+.admin-form { max-width: 800px; margin: 0 auto; padding: 2rem 0; width: 70%; }
+@media (min-width: 769px) {
+  .admin-form { max-width: none; }
+}
 .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .form-header h1 { font-size: 2rem; margin: 0; color: var(--color-heading); font-weight: 700; }
 .btn { padding: 0.625rem 1.25rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background-mute); color: var(--color-text); cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
@@ -477,6 +480,59 @@ onMounted(() => loadVehicle())
 }
 
 @media (max-width: 768px) {
+  .admin-form {
+    max-width: none;
+    padding: 0.25rem 0;
+  }
+
+  .form-header {
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .form-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .financing-section {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .installment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .images-section {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .image-slot {
+    flex-direction: column;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .image-preview {
+    width: 100%;
+    max-width: 120px;
+    height: 90px;
+  }
+
+  .form-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
   .confirm-modal {
     padding: 1.5rem;
     max-width: 90%;

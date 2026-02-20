@@ -41,7 +41,7 @@
         <div class="stat-label">Units released</div>
       </div>
       <div class="stat">
-        <div class="stat-number">1000+</div>
+        <div class="stat-number">500+</div>
         <div class="stat-label">Satisfied buyers</div>
       </div>
       <div class="stat">
@@ -92,6 +92,9 @@
   margin: 0 auto;
   padding: 0 1.5rem;
 }
+@media (min-width: 769px) {
+  .hero-inner { max-width: none; padding: 0 0.5rem; }
+}
 
 .eyebrow {
   font-size: 0.85rem;
@@ -124,6 +127,9 @@
   max-width: 1100px;
   margin: 0 auto 3rem;
   padding: 0 1.5rem;
+}
+@media (min-width: 769px) {
+  .grid { max-width: none; padding: 0 0.5rem; margin-left: 0; margin-right: 0; }
 }
 
 .card {
@@ -187,6 +193,9 @@
   gap: 1.5rem;
   border-top: 1px solid rgba(212, 175, 55, 0.25);
 }
+@media (min-width: 769px) {
+  .stats { max-width: none; padding: 1.5rem 0.5rem 0; margin-left: 0; margin-right: 0; }
+}
 
 .stat {
   text-align: center;
@@ -214,6 +223,9 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 0 1.5rem 1rem;
+}
+@media (min-width: 769px) {
+  .journey { max-width: none; padding: 0 0.5rem 1rem; margin-left: 0; margin-right: 0; }
 }
 
 .journey h2 {
@@ -261,25 +273,65 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .about {
-    padding-top: 2.25rem;
+    padding: 1.5rem 0.25rem 2rem;
+  }
+
+  .hero {
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-inner {
+    padding: 0 0.25rem;
   }
 
   .hero h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
-  .lead {
-    font-size: 0.98rem;
+  .grid {
+    padding: 0 0.25rem;
+    margin-bottom: 1.5rem;
   }
 
   .card {
-    padding: 1.6rem 1.4rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .stats {
+    padding: 1rem 0.25rem 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .journey {
+    padding: 0 0.25rem 1rem;
   }
 
   .steps li {
-    padding: 1.1rem 1.2rem;
+    padding: 0.75rem 0.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .about {
+    padding-top: 1rem;
+  }
+
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .lead {
+    font-size: 0.95rem;
+  }
+
+  .card {
+    padding: 0.875rem 0.5rem;
+  }
+
+  .steps li {
+    padding: 0.6rem 0.5rem;
   }
 }
 </style>

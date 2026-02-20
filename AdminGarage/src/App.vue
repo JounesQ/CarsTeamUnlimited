@@ -1,13 +1,29 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
+import { clearAuth, authUser } from '@/stores/auth'
+import { api } from '@/api/client'
 
 const { theme, toggleTheme } = useTheme()
+const route = useRoute()
+const isLoginPage = () => route.path === '/login'
+
+async function logout() {
+  try {
+    await api.auth.logout()
+  } catch {
+    /* ignore */
+  }
+  clearAuth()
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || ''
+  const loginPath = (base && !base.includes('localhost') && !base.includes(':')) ? `${base}/login` : '/login'
+  window.location.href = `${window.location.origin}${loginPath.replace(/\/+/g, '/')}`
+}
 </script>
 
 <template>
   <div class="app-wrap">
-    <header class="site-header">
+    <header v-if="!isLoginPage()" class="site-header">
       <RouterLink to="/vehicles" class="logo">
         <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="logo-img" />
         <div class="logo-text">
@@ -17,7 +33,10 @@ const { theme, toggleTheme } = useTheme()
       </RouterLink>
       <nav class="nav">
         <RouterLink to="/vehicles" class="nav-link">Vehicles</RouterLink>
+        <RouterLink to="/stats" class="nav-link">Statistics</RouterLink>
         <RouterLink to="/vehicles/new" class="nav-link">Add Vehicle</RouterLink>
+        <span v-if="authUser" class="user-badge">{{ authUser.username }}</span>
+        <button @click="logout" class="btn-logout" title="Logout">Logout</button>
         <button @click="toggleTheme" class="theme-toggle" :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
           <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
@@ -36,10 +55,10 @@ const { theme, toggleTheme } = useTheme()
         </button>
       </nav>
     </header>
-    <main class="main">
+    <main class="main" :class="{ 'main-login': isLoginPage() }">
       <RouterView />
     </main>
-    <footer class="site-footer">
+    <footer v-if="!isLoginPage()" class="site-footer">
       <p>&copy; 2024 P7 Garahe Gallery Admin. All rights reserved.</p>
     </footer>
   </div>
@@ -62,6 +81,11 @@ const { theme, toggleTheme } = useTheme()
   border-bottom: 1px solid var(--color-border);
   background: var(--color-background-soft);
   transition: all 0.3s ease;
+}
+@media (min-width: 769px) {
+  .site-header {
+    padding: 1.25rem 0.5rem;
+  }
 }
 
 .logo {
@@ -152,6 +176,29 @@ const { theme, toggleTheme } = useTheme()
   width: 60%;
 }
 
+.user-badge {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-right: 0.5rem;
+}
+
+.btn-logout {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.btn-logout:hover {
+  border-color: #f56565;
+  color: #f56565;
+}
+
 .theme-toggle {
   padding: 0.625rem;
   background: rgba(212, 175, 55, 0.1);
@@ -180,6 +227,21 @@ const { theme, toggleTheme } = useTheme()
   flex: 1;
   padding: 2rem 1rem;
   min-height: calc(100vh - 180px);
+  overflow: auto;
+}
+
+.main.main-login {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (min-width: 769px) {
+  .main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 
 /* Footer */
@@ -191,37 +253,53 @@ const { theme, toggleTheme } = useTheme()
   color: var(--color-text-muted);
   font-size: 0.875rem;
 }
+@media (min-width: 769px) {
+  .site-footer {
+    padding: 1.5rem 0.5rem;
+  }
+}
 
-/* Responsive */
+/* Responsive - full screen on small displays */
 @media (max-width: 768px) {
   .site-header {
-    padding: 1rem 1.5rem;
+    padding: 0.5rem 0.5rem;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.5rem;
   }
 
   .logo-brand {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .logo-img {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .logo-text {
+    gap: 0;
   }
 
   .nav {
     width: 100%;
     justify-content: center;
     flex-wrap: wrap;
+    gap: 0.25rem;
   }
 
   .nav-link {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
   }
 
   .main {
-    padding: 1.5rem 1rem;
+    padding: 0.5rem 0.25rem;
+    min-height: calc(100vh - 140px);
+  }
+
+  .site-footer {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.75rem;
   }
 }
 </style>

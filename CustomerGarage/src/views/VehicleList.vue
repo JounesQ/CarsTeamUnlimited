@@ -685,12 +685,12 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .vehicle-list {
-    padding: 1rem 0 0 0;
+    padding: 0.25rem 0 0 0;
   }
 
   h1 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
     padding: 0;
   }
 
@@ -705,7 +705,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
     z-index: 2000;
     background: var(--color-background-soft);
     margin: 0;
-    padding: 1rem 1rem 1.25rem;
+    padding: 0.5rem 0.5rem 0.75rem;
     border-radius: 20px 20px 0 0;
     border: 2px solid rgba(212, 175, 55, 0.3);
     border-bottom: none;
@@ -720,8 +720,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   .filters.filters-skeleton {
     display: flex;
     position: static;
-    margin-bottom: 2rem;
-    padding: 1.5rem 0;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
     border-radius: 0;
     border: 0 solid var(--color-border);
     border-top-width: 1px;
@@ -754,17 +754,17 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   /* Make sections on mobile */
   .vehicles-by-make {
-    gap: 2rem;
+    gap: 1rem;
   }
 
   .make-section {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .make-title {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    padding: 0.75rem 0;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0;
   }
 
   .make-title::before,
@@ -784,7 +784,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   /* 2 Column Grid for Mobile */
   .grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+    gap: 0.5rem;
     padding: 0;
   }
 
@@ -797,7 +797,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .card-body {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
 
   .card-footer {
@@ -823,13 +823,13 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   .loading,
   .empty {
-    padding: 2rem 0;
+    padding: 1rem 0;
     font-size: 1rem;
   }
 
   /* Modal adjustments for mobile */
   .modal-overlay {
-    padding: 0.5rem;
+    padding: 0.25rem;
   }
 
   .modal-box {
@@ -838,7 +838,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .modal-header {
-    padding: 1rem 3rem 0.75rem 1.25rem;
+    padding: 0.75rem 2.5rem 0.5rem 0.75rem;
   }
 
   .modal-header h2 {
@@ -850,7 +850,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .modal-gallery {
-    padding: 1rem 1.25rem;
+    padding: 0.5rem 0.5rem;
   }
 
   .modal-main-img {
@@ -878,7 +878,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   .modal-specs,
   .modal-financing {
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 0.5rem;
   }
 
   .modal-specs h3,

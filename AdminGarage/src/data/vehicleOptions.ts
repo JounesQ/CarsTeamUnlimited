@@ -1,8 +1,8 @@
 export const MAKES = [
-  'Acura', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 'Dodge', 'Ford',
-  'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Jeep', 'Kia', 'Lexus', 'Lincoln', 'Mazda',
-  'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Nissan', 'Porsche', 'Ram', 'Subaru', 'Tesla',
-  'Toyota', 'Volkswagen', 'Volvo', 'Other',
+  'Audi', 'BMW', 'Chevrolet', 'Ford',
+  'GMC', 'Honda', 'Hyundai',  'Jeep', 'Kia', 'Lexus',  'Mazda',
+   'Mini', 'Mitsubishi', 'Nissan',   'Subaru', 'Tesla',
+  'Toyota',  'Other',
 ] as const
 
 export const VEHICLE_TYPES = [
@@ -10,7 +10,6 @@ export const VEHICLE_TYPES = [
   { value: 'suv', label: 'SUV' },
   { value: 'truck', label: 'Truck' },
   { value: 'van', label: 'Van' },
-  { value: 'motorcycle', label: 'Motorcycle' },
   { value: 'other', label: 'Other' },
 ] as const
 
@@ -20,15 +19,13 @@ export const CATEGORIES = [
 ] as const
 
 export const FUEL_TYPES = [
-  'Petrol', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid', 'LPG', 'CNG', 'Other',
+  'Petrol', 'Diesel','Gasoline', 'Electric (EV)', 'Hybrid (Electric-Gasoline)',  'Other',
 ] as const
 
 export const TRANSMISSIONS = [
   { value: 'automatic', label: 'Automatic' },
   { value: 'manual', label: 'Manual' },
-  { value: 'semi-automatic', label: 'Semi-Automatic' },
   { value: 'cvt', label: 'CVT' },
-  { value: 'dual-clutch', label: 'Dual-Clutch' },
-  { value: 'single-speed', label: 'Single-Speed' },
+  { value: 'dct', label: 'DCT (Dual-Clutch)' },
   { value: 'other', label: 'Other' },
 ] as const

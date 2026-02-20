@@ -195,6 +195,9 @@ const router = useRouter()
   max-width: 800px;
   margin: 0 auto;
 }
+@media (min-width: 769px) {
+  .hero-content { max-width: none; padding: 2rem 0.5rem; }
+}
 
 .logo-container {
   margin-bottom: 2rem;
@@ -312,6 +315,9 @@ const router = useRouter()
   padding: 5rem 2rem;
   background: #0a0a0a;
 }
+@media (min-width: 769px) {
+  .features-section { padding: 5rem 0.5rem; }
+}
 
 .features-container {
   max-width: 1200px;
@@ -319,6 +325,9 @@ const router = useRouter()
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
+}
+@media (min-width: 769px) {
+  .features-container { max-width: none; }
 }
 
 .feature-card {
@@ -367,6 +376,9 @@ const router = useRouter()
   background: #000;
   border-top: 1px solid rgba(212, 175, 55, 0.1);
 }
+@media (min-width: 769px) {
+  .stats-section { padding: 4rem 0.5rem; }
+}
 
 .stats-container {
   max-width: 1000px;
@@ -376,6 +388,9 @@ const router = useRouter()
   align-items: center;
   flex-wrap: wrap;
   gap: 2rem;
+}
+@media (min-width: 769px) {
+  .stats-container { max-width: none; }
 }
 
 .stat-item {
@@ -412,10 +427,16 @@ const router = useRouter()
   background: #0a0a0a;
   border-top: 1px solid rgba(212, 175, 55, 0.1);
 }
+@media (min-width: 769px) {
+  .location-section { padding: 5rem 0.5rem; }
+}
 
 .location-container {
   max-width: 1200px;
   margin: 0 auto;
+}
+@media (min-width: 769px) {
+  .location-container { max-width: none; }
 }
 
 .location-header {
@@ -538,34 +559,55 @@ const router = useRouter()
 
 /* Responsive */
 @media (max-width: 768px) {
+  .hero-content {
+    padding: 1.5rem 0.25rem;
+  }
+
   .logo {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
   }
 
   .brand-name {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .tagline {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .cta-primary {
-    padding: 0.875rem 2rem;
-    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .features-section {
+    padding: 3rem 0.25rem;
   }
 
   .features-container {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .stats-section {
+    padding: 2.5rem 0.25rem;
+  }
+
+  .stat-number {
+    font-size: 2.25rem;
   }
 
   .stat-divider {
     display: none;
   }
 
-  .stat-number {
-    font-size: 2.5rem;
+  .location-section {
+    padding: 3rem 0.25rem;
   }
 
   .location-content {
@@ -577,34 +619,34 @@ const router = useRouter()
   }
 
   .section-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .section-subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 }
 
 @media (max-width: 480px) {
   .brand-name {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     letter-spacing: 1px;
   }
 
   .features-section {
-    padding: 3rem 1rem;
+    padding: 2rem 0.25rem;
   }
 
   .stats-section {
-    padding: 3rem 1rem;
+    padding: 2rem 0.25rem;
   }
 
   .location-section {
-    padding: 3rem 1rem;
+    padding: 2rem 0.25rem;
   }
 
   .section-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
   }
 
   .location-map {

@@ -21,7 +21,7 @@ class VehicleImage extends Model
         return $this->belongsTo(Vehicle::class);
     }
 
-    /** Full URL for display (e.g. in server-side views). API returns raw path; frontend builds URL. */
+    /** Full URL for display  */
     public function getImageUrlAttribute(): string
     {
         if (str_starts_with($this->image_path, 'http')) {

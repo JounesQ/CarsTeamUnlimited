@@ -123,6 +123,12 @@ onMounted(async () => {
 
 <style scoped>
 .vehicle-detail { max-width: 900px; margin: 0 auto; padding: 1rem 0; }
+@media (min-width: 769px) {
+  .vehicle-detail { max-width: none; margin: 0; padding: 1rem 0.5rem; }
+}
+@media (max-width: 768px) {
+  .vehicle-detail { max-width: none; margin: 0; padding: 0.5rem 0.25rem; }
+}
 .back { background: none; border: none; color: hsla(160, 100%, 37%, 1); cursor: pointer; margin-bottom: 1rem; font-size: 1rem; }
 .loading, .error { text-align: center; padding: 2rem; }
 .error { color: #c00; }

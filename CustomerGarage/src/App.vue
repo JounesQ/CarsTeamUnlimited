@@ -181,10 +181,16 @@ const toggleMobileFilters = () => {
 .nav-link.router-link-active::after {
   width: 60%;
 }
+@media (min-width: 769px) {
+  .site-header {
+    padding: 1rem 2.5rem;
+  }
+}
 
 .main {
   flex: 1;
-  padding: 0;
+  padding-right: 1rem;
+  padding-left: 1rem;
 }
 
 /* Mobile Bottom Navigation */
@@ -200,6 +206,11 @@ const toggleMobileFilters = () => {
   text-align: center;
   color: #888;
   font-size: 0.9rem;
+}
+@media (min-width: 769px) {
+  .site-footer {
+    padding: 1.5rem 0.5rem;
+  }
 }
 
 .site-footer p {
@@ -218,21 +229,21 @@ const toggleMobileFilters = () => {
   }
 
   .site-header {
-    padding: 1rem 1.5rem;
+    padding: 0.5rem 0.5rem;
     justify-content: center;
   }
 
   .logo {
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
   .logo-text {
-    font-size: 1.35rem;
+    font-size: 1.50rem;
   }
 
   .logo-img {
-    width: 52px;
-    height: 52px;
+    width: 40px;
+    height: 40px;
   }
 
   /* Hide desktop navigation on mobile */
@@ -247,8 +258,8 @@ const toggleMobileFilters = () => {
   
   .mobile-footer {
     display: block;
-    padding: 1rem 1.25rem 0.75rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 0.5rem 0.5rem;
+    font-size: 0.75rem;
   }
 
   .main {
