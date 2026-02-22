@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { api, imageUrl } from '@/api/client'
 import type { Vehicle, VehicleForm, Paginated } from '@/types/vehicle'
 import { MAKES } from '@/data/vehicleOptions'
 
+const route = useRoute()
 const router = useRouter()
 const vehicles = ref<Vehicle[]>([])
 const loading = ref(true)
 const pagination = ref({ current_page: 1, last_page: 1, per_page: 15, total: 0 })
-const statusFilter = ref('')
-const makeFilter = ref('')
+const statusFilter = ref((route.query.status as string) || '')
+const makeFilter = ref((route.query.make as string) || '')
 
 // Modal state
 const modalOpen = ref(false)
@@ -60,6 +61,14 @@ function formatTerm(key: string) {
   return n ? `${n} years` : key.replace(/_/g, ' ')
 }
 
+function syncUrl(page: number) {
+  const q: Record<string, string> = {}
+  if (page > 1) q.page = String(page)
+  if (statusFilter.value) q.status = statusFilter.value
+  if (makeFilter.value) q.make = makeFilter.value
+  router.replace({ path: route.path, query: q })
+}
+
 async function load(page = 1) {
   loading.value = true
   try {
@@ -69,6 +78,7 @@ async function load(page = 1) {
     const res = await api.admin.getVehicles(params) as Paginated<Vehicle>
     vehicles.value = Array.isArray(res?.data) ? res.data : []
     pagination.value = { current_page: res.current_page, last_page: res.last_page, per_page: res.per_page, total: res.total }
+    syncUrl(page)
   } catch (e) {
     console.error(e)
     vehicles.value = []
@@ -225,7 +235,10 @@ function showErrorMessage(message: string) {
   }, 3000)
 }
 
-onMounted(() => load(1))
+onMounted(() => {
+  const page = Math.max(1, parseInt(route.query.page as string, 10) || 1)
+  load(page)
+})
 </script>
 
 <template>
