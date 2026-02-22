@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { api, imageUrl } from '@/api/client'
 import type { Vehicle, VehicleForm, Paginated } from '@/types/vehicle'
@@ -18,6 +18,17 @@ const selectedVehicle = ref<Vehicle | null>(null)
 const editingStatus = ref(false)
 const newStatus = ref('')
 const actionLoading = ref(false)
+const selectedTerm = ref<string | null>(null)
+
+const sortedInstallments = computed(() => {
+  const opts = selectedVehicle.value?.financing_options
+  if (!opts || !Object.keys(opts).length) return []
+  return Object.entries(opts).sort(([a], [b]) => {
+    const numA = parseInt(a.replace(/\D/g, ''), 10) || 0
+    const numB = parseInt(b.replace(/\D/g, ''), 10) || 0
+    return numA - numB
+  })
+})
 
 // Confirmation modal state
 const confirmModalOpen = ref(false)
@@ -43,10 +54,16 @@ function formatPrice(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'php', maximumFractionDigits: 0 }).format(n)
 }
 
+function formatTerm(key: string) {
+  const n = key.replace(/\D/g, '')
+  if (key.includes('year') && !key.includes('years')) return n ? `${n} year` : key
+  return n ? `${n} years` : key.replace(/_/g, ' ')
+}
+
 async function load(page = 1) {
   loading.value = true
   try {
-    const params: Record<string, string | number> = { page, per_page: 5 }
+    const params: Record<string, string | number> = { page, per_page: 10 }
     if (statusFilter.value) params.status = statusFilter.value
     if (makeFilter.value) params.make = makeFilter.value
     const res = await api.admin.getVehicles(params) as Paginated<Vehicle>
@@ -64,6 +81,7 @@ function openModal(vehicle: Vehicle) {
   selectedVehicle.value = vehicle
   newStatus.value = vehicle.status
   editingStatus.value = false
+  selectedTerm.value = null
   modalOpen.value = true
 }
 
@@ -320,27 +338,75 @@ onMounted(() => load(1))
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Price:</span>
-                  <span class="detail-value price">{{ formatPrice(selectedVehicle.price) }}</span>
+                  <span class="detail-value price">{{ formatPrice(selectedVehicle.price) }} <span v-if="selectedVehicle.is_negotiable" class="neg">(negotiable)</span></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Year:</span>
+                  <span class="detail-value">{{ selectedVehicle.year }}</span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Type:</span>
-                  <span class="detail-value">{{ selectedVehicle.vehicle_type }}</span>
+                  <span class="detail-value">{{ selectedVehicle.vehicle_type || '—' }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Category:</span>
+                  <span class="detail-value">{{ selectedVehicle.category || '—' }}</span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Transmission:</span>
-                  <span class="detail-value">{{ selectedVehicle.transmission }}</span>
+                  <span class="detail-value">{{ selectedVehicle.transmission || '—' }}</span>
                 </div>
-                <div class="detail-row" v-if="selectedVehicle.fuel_type">
+                <div class="detail-row">
                   <span class="detail-label">Fuel:</span>
-                  <span class="detail-value">{{ selectedVehicle.fuel_type }}</span>
+                  <span class="detail-value">{{ selectedVehicle.fuel_type || '—' }}</span>
                 </div>
-                <div class="detail-row" v-if="selectedVehicle.mileage">
+                <div class="detail-row">
+                  <span class="detail-label">Color:</span>
+                  <span class="detail-value">{{ selectedVehicle.color || '—' }}</span>
+                </div>
+                <div class="detail-row">
                   <span class="detail-label">Mileage:</span>
-                  <span class="detail-value">{{ selectedVehicle.mileage?.toLocaleString() }} km</span>
+                  <span class="detail-value">{{ selectedVehicle.mileage != null ? selectedVehicle.mileage.toLocaleString() + ' km' : '—' }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Doors:</span>
+                  <span class="detail-value">{{ selectedVehicle.door_count ?? '—' }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Seats:</span>
+                  <span class="detail-value">{{ selectedVehicle.seat_capacity ?? '—' }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Grade:</span>
+                  <span class="detail-value">{{ selectedVehicle.grade || '—' }}</span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Views:</span>
                   <span class="detail-value">{{ selectedVehicle.views_count }}</span>
+                </div>
+              </div>
+
+              <div v-if="selectedVehicle.down_payment != null || (selectedVehicle.financing_options && Object.keys(selectedVehicle.financing_options).length)" class="modal-financing">
+                <h3>Financing</h3>
+                <p v-if="selectedVehicle.down_payment != null">Down payment: {{ formatPrice(selectedVehicle.down_payment) }} <span v-if="selectedVehicle.dp_all_in">(all-in)</span></p>
+                <div v-if="selectedVehicle.financing_options && Object.keys(selectedVehicle.financing_options).length" class="modal-installments">
+                  <h4>Monthly installments</h4>
+                  <div class="term-buttons">
+                    <button
+                      v-for="[key, monthly] in sortedInstallments"
+                      :key="key"
+                      type="button"
+                      class="term-btn"
+                      :class="{ active: selectedTerm === key }"
+                      @click="selectedTerm = key"
+                    >
+                      {{ formatTerm(key) }}
+                    </button>
+                  </div>
+                  <div v-if="selectedTerm && selectedVehicle.financing_options[selectedTerm] != null" class="monthly-amount">
+                    <span class="amount-label">Monthly payment:</span>
+                    <span class="amount-value">{{ formatPrice(selectedVehicle.financing_options[selectedTerm]!) }}</span>
+                  </div>
                 </div>
               </div>
 
@@ -577,6 +643,98 @@ onMounted(() => load(1))
   color: var(--gold-primary);
   font-weight: 700;
   font-size: 1.25rem;
+}
+
+.detail-value .neg {
+  font-weight: normal;
+  opacity: 0.8;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.modal-financing {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.modal-financing h3 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+  color: var(--gold-primary);
+  font-weight: 700;
+}
+
+.modal-financing p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.modal-installments {
+  margin-top: 1rem;
+}
+
+.modal-installments h4 {
+  font-size: 1rem;
+  margin: 0 0 1rem;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.term-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.term-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-background);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.term-btn:hover {
+  border-color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.05);
+  transform: translateY(-2px);
+}
+
+.term-btn.active {
+  border-color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold-primary);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+}
+
+.monthly-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05));
+  border-radius: 10px;
+  border: 2px solid var(--gold-primary);
+}
+
+.amount-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.amount-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold-primary);
 }
 
 .status-edit {

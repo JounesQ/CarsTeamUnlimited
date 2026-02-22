@@ -1,8 +1,8 @@
 export const MAKES = [
-  'Audi', 'BMW', 'Chevrolet', 'Ford',
-  'GMC', 'Honda', 'Hyundai',  'Jeep', 'Kia', 'Lexus',  'Mazda',
-   'Mini', 'Mitsubishi', 'Nissan',   'Subaru', 'Tesla',
-  'Toyota',  'Other',
+  'Audi', 'BAIC', 'BMW', 'BYD', 'Chevrolet', 'Changan', 'Ford',
+  'GAC', 'Geely', 'GMC', 'Honda', 'Hyundai', 'Isuzu', 'Jeep', 'Kia', 'Lexus', 'Mazda',
+  'Mini', 'Mitsubishi', 'Nissan', 'Subaru', 'Suzuki', 'Tesla',
+  'Toyota', 'Other',
 ] as const
 
 export const VEHICLE_TYPES = [
@@ -25,7 +25,9 @@ export const FUEL_TYPES = [
 export const TRANSMISSIONS = [
   { value: 'automatic', label: 'Automatic' },
   { value: 'manual', label: 'Manual' },
+  { value: 'semi-automatic', label: 'Semi-Automatic' },
   { value: 'cvt', label: 'CVT' },
-  { value: 'dct', label: 'DCT (Dual-Clutch)' },
+  { value: 'dual-clutch', label: 'Dual-Clutch' },
+  { value: 'single-speed', label: 'Single-Speed' },
   { value: 'other', label: 'Other' },
 ] as const

@@ -1,8 +1,8 @@
 export const MAKES = [
-  'Audi', 'BMW', 'Chevrolet', 'Ford',
-  'GMC', 'Honda', 'Hyundai',  'Jeep', 'Kia', 'Lexus',  'Mazda',
-   'Mini', 'Mitsubishi', 'Nissan',   'Subaru', 'Tesla',
-  'Toyota',  'Other',
+  'Audi', 'BAIC', 'BMW', 'BYD', 'Chevrolet', 'Changan', 'Ford',
+  'GAC', 'Geely', 'GMC', 'Honda', 'Hyundai', 'Isuzu', 'Jeep', 'Kia', 'Lexus', 'Mazda',
+  'Mini', 'Mitsubishi', 'Nissan', 'Subaru', 'Suzuki', 'Tesla',
+  'Toyota', 'Other',
 ] as const
 
 export const VEHICLE_TYPES = [
@@ -20,4 +20,8 @@ export const CATEGORIES = [
 
 export const FUEL_TYPES = [
   'Petrol', 'Diesel','Gasoline', 'Electric (EV)', 'Hybrid (Electric-Gasoline)',  'Other',
+] as const
+
+export const TRANSMISSIONS = [
+  'Automatic', 'Manual', 'Semi-Automatic', 'CVT', 'Dual-Clutch', 'Single-Speed', 'Other',
 ] as const
