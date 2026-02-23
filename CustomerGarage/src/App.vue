@@ -183,7 +183,12 @@ const toggleMobileFilters = () => {
 }
 @media (min-width: 769px) {
   .site-header {
+    position: sticky;
+    top: 0;
     padding: 1rem 2.5rem;
+  }
+  .site-header.header-transparent {
+    position: sticky;
   }
 }
 
@@ -229,8 +234,14 @@ const toggleMobileFilters = () => {
   }
 
   .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     padding: 0.5rem 0.5rem;
     justify-content: center;
+  }
+  .site-header.header-transparent {
+    position: sticky;
   }
 
   .logo {

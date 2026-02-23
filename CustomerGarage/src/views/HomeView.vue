@@ -1,6 +1,19 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { api } from '@/api/client'
+
 const router = useRouter()
+const availableCount = ref<number | null>(null)
+
+onMounted(async () => {
+  try {
+    const res = await api.getVehicles({ per_page: 1 })
+    availableCount.value = res.total
+  } catch {
+    availableCount.value = null
+  }
+})
 </script>
 
 <template>
@@ -68,12 +81,12 @@ const router = useRouter()
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <div class="stat-number">1000+</div>
+          <div class="stat-number">500+</div>
           <div class="stat-label">Happy Customers</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <div class="stat-number">50+</div>
+          <div class="stat-number">{{ availableCount != null ? availableCount : '—' }}</div>
           <div class="stat-label">Available Now</div>
         </div>
       </div>

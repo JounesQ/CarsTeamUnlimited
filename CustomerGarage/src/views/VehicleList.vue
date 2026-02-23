@@ -479,13 +479,17 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .vehicles-by-make { display: flex; flex-direction: column; gap: 3rem; }
 .make-section { display: flex; flex-direction: column; }
 .make-title {
+  position: sticky;
+  top: 60px;
+  z-index: 50;
   font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
   color: var(--gold-primary);
   margin: 0 0 2rem;
   padding: 1rem 0;
-  position: relative;
+  background: var(--color-background);
+  box-shadow: 0 2px 0 var(--color-background);
 }
 .make-title::before,
 .make-title::after {
@@ -762,6 +766,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .make-title {
+    top: 55px;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
     padding: 0.5rem 0;

@@ -84,6 +84,9 @@ async function logout() {
 }
 @media (min-width: 769px) {
   .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     padding: 1.25rem 0.5rem;
   }
 }
