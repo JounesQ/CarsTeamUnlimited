@@ -93,19 +93,9 @@ const toggleMobileFilters = () => {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 3rem;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 1.5);
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-  backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-}
-
-.header-transparent {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: transparent;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
 }
 
 .logo {
@@ -237,7 +227,7 @@ const toggleMobileFilters = () => {
     position: sticky;
     top: 0;
     z-index: 100;
-    padding: 0.5rem 0.5rem;
+    padding: 0.40rem 0.5rem;
     justify-content: center;
   }
   .site-header.header-transparent {

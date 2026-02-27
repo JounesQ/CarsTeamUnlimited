@@ -16,14 +16,14 @@ class VehicleSeeder extends Seeder
 {
     /** @see vehicleOptions.ts MAKES (lines 2–5, no Other) */
     private const MAKES = [
-        'Acura', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 'Dodge', 'Ford',
-        'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Jeep', 'Kia', 'Lexus', 'Lincoln', 'Mazda',
-        'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Nissan', 'Porsche', 'Ram', 'Subaru', 'Tesla',
-        'Toyota', 'Volkswagen', 'Volvo',
+        'Audi', 'BMW', 'Chevrolet','Ford',
+        'GMC', 'Honda', 'Hyundai', 'Jeep', 'Kia', 'Lexus', 'Mazda',
+        'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Subaru', 'Tesla',
+        'Toyota',
     ];
 
     /** @see vehicleOptions.ts VEHICLE_TYPES (car, suv, truck, van, motorcycle only) */
-    private const VEHICLE_TYPES = ['car', 'suv', 'truck', 'van', 'motorcycle'];
+    private const VEHICLE_TYPES = ['car', 'suv', 'truck', 'van'];
 
     /** @see vehicleOptions.ts CATEGORIES (no Other) */
     private const CATEGORIES = [
@@ -33,12 +33,12 @@ class VehicleSeeder extends Seeder
 
     /** @see vehicleOptions.ts FUEL_TYPES: Petrol, Diesel, Electric, Hybrid, Plug-in Hybrid, LPG, CNG */
     private const FUEL_TYPES = [
-        'Petrol', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid', 'LPG', 'CNG',
+        'Petrol', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid',
     ];
 
     /** @see AdminGarage vehicleOptions.ts TRANSMISSIONS (value) */
     private const TRANSMISSIONS = [
-        'automatic', 'manual', 'semi-automatic', 'cvt', 'dual-clutch', 'single-speed', 'other',
+        'automatic', 'manual', 'semi-automatic','dual-clutch', 'single-speed', 'other',
     ];
 
     private const COLORS = [

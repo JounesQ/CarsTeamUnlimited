@@ -20,8 +20,25 @@ onMounted(async () => {
   <main class="home">
     <div class="hero-section">
       <div class="hero-content">
-        <div class="logo-container">
-          <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="logo" />
+        <div class="vehicle-carousel">
+          <div class="carousel-track">
+            <img src="/nissan.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/audi1.png" alt="Vehicle 2" class="carousel-item" />
+            <img src="/jeep.png" alt="Vehicle 3" class="carousel-item" />
+            <img src="/hyundai.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/honda.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/bmw1.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/fordy.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/nissan.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/audi1.png" alt="Vehicle 2" class="carousel-item" />
+            <img src="/jeep.png" alt="Vehicle 3" class="carousel-item" />
+            <img src="/hyundai.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/honda.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/bmw1.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/fordy.png" alt="Vehicle 1" class="carousel-item" />
+            <img src="/nissan.png" alt="Vehicle 1" class="carousel-item" />
+            
+          </div>
         </div>
         <h1 class="brand-name">P7 GARAHE GALLERY</h1>
         <p class="tagline">WE KNOW YOUR NEEDS</p>
@@ -209,20 +226,83 @@ onMounted(async () => {
   margin: 0 auto;
 }
 @media (min-width: 769px) {
-  .hero-content { max-width: none; padding: 2rem 0.5rem; }
+  .hero-content { max-width: none; padding: 1rem 0.5rem; }
 }
 
-.logo-container {
+/* Vehicle Carousel Container */
+.vehicle-carousel {
   margin-bottom: 2rem;
-  animation: fadeInDown 1s ease-out;
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  /* Enable native swiping/scrolling */
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  
+  /* Hide scrollbar for a clean look */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  
+  /* Fade edges for premium look */
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
-.logo {
-  width: 180px;
+/* Hide scrollbar for Chrome, Safari and Opera */
+.vehicle-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: 2rem; /* Space between cars */
+  padding: 2rem 0; /* Padding allows room for the zoom effect without clipping */
+  
+  /* Continuous nonstop movement */
+  animation: scrollContinuous 20s linear infinite;
+}
+
+/* Pause the scrolling when hovering or touching/swiping */
+.vehicle-carousel:hover .carousel-track,
+.vehicle-carousel:active .carousel-track,
+.vehicle-carousel:focus-within .carousel-track {
+  animation-play-state: paused;
+}
+
+.carousel-item {
+  width: 280px; 
   height: 180px;
   object-fit: contain;
-  background: transparent;
-  filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.5));
+  flex-shrink: 0; /* Prevents flexbox from squeezing the images */
+  filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.2));
+  
+  /* Smooth zoom transition */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s ease;
+  cursor: pointer;
+}
+
+/* Zoom in slightly and smoothly on hover/touch */
+.carousel-item:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6));
+  z-index: 2;
+}
+
+/* Non-stop scroll animation */
+@keyframes scrollContinuous {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* Moves by exactly half to loop smoothly (assuming duplicated images) */
+    transform: translateX(-50%);
+  }
 }
 
 .brand-name {
@@ -572,8 +652,15 @@ onMounted(async () => {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .hero-section {
+    min-height: auto;
+    align-items: flex-start;
+    padding-top: 0.5rem;
+    padding-bottom: 1rem;
+  }
+
   .hero-content {
-    padding: 1.5rem 0.25rem;
+    padding: 2rem 0.25rem 8rem;
   }
 
   .logo {
