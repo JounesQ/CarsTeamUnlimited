@@ -332,7 +332,7 @@ onMounted(() => {
                   </button>
                   <div class="carousel-main">
                     <img
-                      :src="imageSrc(sortedImages(selectedVehicle)[carouselIndex]?.image_path)"
+                      :src="imageSrc(sortedImages(selectedVehicle)[carouselIndex]?.image_path ?? '')"
                       :alt="`${selectedVehicle.title} - image ${carouselIndex + 1}`"
                     />
                   </div>

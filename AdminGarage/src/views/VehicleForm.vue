@@ -65,8 +65,10 @@ async function onFilesPicked(event: Event) {
   uploadingCount.value = toAdd
   const failed: string[] = []
   for (let i = 0; i < toAdd; i++) {
+    const file = imageFiles[i]
+    if (!file) continue
     try {
-      const { path } = await api.admin.uploadImage(imageFiles[i])
+      const { path } = await api.admin.uploadImage(file)
       form.value.images.push({
         image_path: path,
         position: form.value.images.length + 1,
@@ -74,7 +76,7 @@ async function onFilesPicked(event: Event) {
       })
       reorderPositions()
     } catch (e) {
-      const name = imageFiles[i].name
+      const name = file.name
       const msg = e instanceof Error ? e.message : 'Upload failed'
       failed.push(`${name}: ${msg}`)
     }
@@ -109,7 +111,8 @@ function onDrop(event: DragEvent, dropIndex: number) {
     return
   }
   const imgs = [...form.value.images]
-  const [removed] = imgs.splice(from, 1)
+  const removed = imgs.splice(from, 1)[0]
+  if (removed === undefined) return
   imgs.splice(dropIndex, 0, removed)
   form.value.images = imgs
   reorderPositions()
