@@ -3,19 +3,13 @@ import { ref, onMounted, onUnmounted, watch, computed, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { imageUrl } from '@/api/client'
 import type { Vehicle } from '@/types/vehicle'
-import { MAKES, VEHICLE_TYPES, CATEGORIES, FUEL_TYPES } from '@/data/vehicleOptions'
+import { MAKES } from '@/data/vehicleOptions'
 import { useCachedVehicles, getCachedVehicle } from '@/composables/useCachedApi'
 
 const route = useRoute()
 const cachedVehicles = useCachedVehicles()
 const vehicles = ref<Vehicle[]>([])
 const make = ref((route.query.make as string) || '')
-const vehicleType = ref((route.query.vehicle_type as string) || '')
-const category = ref((route.query.category as string) || '')
-const fuelType = ref((route.query.fuel_type as string) || '')
-const year = ref(route.query.year ? Number(route.query.year) : undefined as number | undefined)
-const minPrice = ref(route.query.min_price ? Number(route.query.min_price) : undefined as number | undefined)
-const maxPrice = ref(route.query.max_price ? Number(route.query.max_price) : undefined as number | undefined)
 
 // Inject mobile filters visibility from parent
 const showMobileFilters = inject<any>('showMobileFilters', ref(false))
@@ -25,7 +19,6 @@ const modalVehicle = ref<Vehicle | null>(null)
 const modalError = ref('')
 
 const carouselIndex = ref(0)
-const selectedTerm = ref<string | null>(null)
 
 // Group vehicles by make
 const vehiclesByMake = computed(() => {
@@ -50,12 +43,7 @@ const vehiclesByMake = computed(() => {
 
 const orderedImages = computed(() => {
   const imgs = modalVehicle.value?.images || []
-  return [...imgs].sort((a, b) => {
-    const priA = a.is_primary ? 1 : 0
-    const priB = b.is_primary ? 1 : 0
-    if (priA !== priB) return priB - priA
-    return (a.position ?? 0) - (b.position ?? 0)
-  })
+  return [...imgs].sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 })
 const currentImageUrl = computed(() => {
   const img = orderedImages.value[carouselIndex.value]
@@ -76,16 +64,6 @@ function prevImage() {
   setCarouselIndex((carouselIndex.value - 1 + orderedImages.value.length) % orderedImages.value.length)
 }
 
-const sortedInstallments = computed(() => {
-  const opts = modalVehicle.value?.financing_options
-  if (!opts || !Object.keys(opts).length) return []
-  return Object.entries(opts).sort(([a], [b]) => {
-    const numA = parseInt(a.replace(/\D/g, ''), 10) || 0
-    const numB = parseInt(b.replace(/\D/g, ''), 10) || 0
-    return numA - numB
-  })
-})
-
 function primaryImageForCard(v: Vehicle) {
   const img = v.images?.find((i) => i.is_primary) || v.images?.[0]
   return img?.image_path ? imageUrl(img.image_path) : ''
@@ -95,12 +73,6 @@ function formatPrice(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'php', maximumFractionDigits: 0 }).format(n)
 }
 
-function formatTerm(key: string) {
-  const n = key.replace(/\D/g, '')
-  if (key.includes('year') && !key.includes('years')) return n ? `${n} year` : key
-  return n ? `${n} years` : key.replace(/_/g, ' ')
-}
-
 function formatStatus(status: string) {
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
@@ -108,7 +80,6 @@ function formatStatus(status: string) {
 async function openModal(id: string) {
   modalError.value = ''
   carouselIndex.value = 0
-  selectedTerm.value = null
   try {
     // Fetch data (with caching) before opening modal
     const vehicleData = await getCachedVehicle(id)
@@ -117,13 +88,8 @@ async function openModal(id: string) {
     // Push history so browser Back closes modal instead of leaving the page
     const url = window.location.pathname + window.location.search
     window.history.pushState({ vehicleModal: true }, '', url)
-    // start carousel on primary image if exists
-    const primaryIdx = orderedImages.value.findIndex((i) => i.is_primary)
-    if (primaryIdx >= 0) carouselIndex.value = primaryIdx
-    // Set first term as default if financing options exist
-    if (vehicleData.financing_options && Object.keys(vehicleData.financing_options).length > 0) {
-      selectedTerm.value = sortedInstallments.value[0]?.[0] || null
-    }
+    // start carousel on first image
+    carouselIndex.value = 0
   } catch (e) {
     // The API client already transforms network errors to friendly messages
     modalError.value = e instanceof Error ? e.message : 'Unable to load vehicle details. Please try again later.'
@@ -135,7 +101,6 @@ async function openModal(id: string) {
 function closeModal() {
   modalOpen.value = false
   modalVehicle.value = null
-  selectedTerm.value = null
 }
 
 // When user presses browser Back while modal is open, close modal and stay on VehicleList
@@ -153,12 +118,6 @@ function handleCloseModal() {
 async function load() {
   const params: Record<string, string | number> = { per_page: 500 }
   if (make.value) params.make = make.value
-  if (vehicleType.value) params.vehicle_type = vehicleType.value
-  if (category.value) params.category = category.value
-  if (fuelType.value) params.fuel_type = fuelType.value
-  if (year.value != null) params.year = year.value
-  if (minPrice.value != null) params.min_price = minPrice.value
-  if (maxPrice.value != null) params.max_price = maxPrice.value
 
   await cachedVehicles.load({
     params,
@@ -178,12 +137,6 @@ async function load() {
 function applyFilters() {
   const q: Record<string, string> = {}
   if (make.value) q.make = make.value
-  if (vehicleType.value) q.vehicle_type = vehicleType.value
-  if (category.value) q.category = category.value
-  if (fuelType.value) q.fuel_type = fuelType.value
-  if (year.value) q.year = String(year.value)
-  if (minPrice.value != null) q.min_price = String(minPrice.value)
-  if (maxPrice.value != null) q.max_price = String(maxPrice.value)
   window.history.replaceState({}, '', `${window.location.pathname}?${new URLSearchParams(q).toString()}`)
   load()
 }
@@ -199,16 +152,10 @@ onUnmounted(() => {
 // Sync filters from URL (e.g. back/forward, direct link); applyFilters() will run via ref watch and load
 watch(() => route.query, (q) => {
   make.value = (q.make as string) || ''
-  vehicleType.value = (q.vehicle_type as string) || ''
-  category.value = (q.category as string) || ''
-  fuelType.value = (q.fuel_type as string) || ''
-  year.value = q.year ? Number(q.year) : undefined
-  minPrice.value = q.min_price ? Number(q.min_price) : undefined
-  maxPrice.value = q.max_price ? Number(q.max_price) : undefined
 }, { immediate: false })
 
 // Auto-search when any filter changes (no Search button click needed)
-watch([make, vehicleType, category, fuelType, year, minPrice, maxPrice], () => {
+watch([make], () => {
   applyFilters()
 }, { deep: true })
 </script>
@@ -221,19 +168,6 @@ watch([make, vehicleType, category, fuelType, year, minPrice, maxPrice], () => {
         <option value="">All makes</option>
         <option v-for="m in MAKES" :key="m" :value="m">{{ m }}</option>
       </select>
-      <select v-model="vehicleType" class="filter-inp">
-        <option value="">All types</option>
-        <option v-for="t in VEHICLE_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
-      </select>
-      <select v-model="category" class="filter-inp">
-        <option value="">All categories</option>
-        <option v-for="c in CATEGORIES" :key="c" :value="c">{{ c }}</option>
-      </select>
-      <select v-model="fuelType" class="filter-inp">
-        <option value="">All fuel types</option>
-        <option v-for="f in FUEL_TYPES" :key="f" :value="f">{{ f }}</option>
-      </select>
-     
     </div>
     <!-- Skeleton loading (first load) -->
     <div v-if="cachedVehicles.loading.value && !cachedVehicles.data.value" class="vehicles-by-make skeleton-loading">
@@ -280,7 +214,7 @@ watch([make, vehicleType, category, fuelType, year, minPrice, maxPrice], () => {
               <div v-else class="card-img-placeholder">No image</div>
             </div>
             <div class="card-body">
-              <h3 class="card-title">{{ v.year }} {{ v.make }} {{ v.model }}</h3>
+              <h3 class="card-title">{{ v.title || v.make }}</h3>
               <div class="card-footer">
                 <p class="card-price">{{ formatPrice(v.price) }}</p>
                 <span v-if="v.status === 'available'" class="status-badge">Available</span>
@@ -305,8 +239,8 @@ watch([make, vehicleType, category, fuelType, year, minPrice, maxPrice], () => {
             <p v-if="modalError" class="modal-error">{{ modalError }}</p>
             <template v-else-if="modalVehicle">
               <div class="modal-header">
-                <h2>{{ modalVehicle.year }} {{ modalVehicle.make }} {{ modalVehicle.model }}</h2>
-                <p class="modal-price">{{ formatPrice(modalVehicle.price) }} <span v-if="modalVehicle.is_negotiable" class="neg">(negotiable)</span></p>
+                <h2>{{ modalVehicle.title || modalVehicle.make }}</h2>
+                <p class="modal-price">{{ formatPrice(modalVehicle.price) }}</p>
               </div>
               <div class="modal-gallery">
                 <div class="modal-main-img">
@@ -334,7 +268,7 @@ watch([make, vehicleType, category, fuelType, year, minPrice, maxPrice], () => {
                 <div v-if="orderedImages.length > 1" class="modal-thumbs">
                   <button
                     v-for="(img, idx) in orderedImages"
-                    :key="img.id"
+                    :key="img.id ?? img.image_path ?? idx"
                     type="button"
                     class="thumb-btn"
                     :class="{ active: idx === carouselIndex }"
@@ -345,45 +279,10 @@ watch([make, vehicleType, category, fuelType, year, minPrice, maxPrice], () => {
                   </button>
                 </div>
               </div>
-              <div class="modal-specs">
+              <div v-if="modalVehicle.details_and_financing" class="modal-specs">
                 <div class="modal-details-logo-bg" area-hidden="true"></div>
-                <h3>Details</h3>
-                <dl>
-                  <dt>Year</dt><dd>{{ modalVehicle.year }}</dd>
-                  <dt>Make / Model</dt><dd>{{ modalVehicle.make }} {{ modalVehicle.model }}</dd>
-                  <dt>Type</dt><dd>{{ modalVehicle.vehicle_type || '—' }}</dd>
-                  <dt>Category</dt><dd>{{ modalVehicle.category || '—' }}</dd>
-                  <dt>Transmission</dt><dd>{{ modalVehicle.transmission }}</dd>
-                  <dt>Fuel Type</dt><dd>{{ modalVehicle.fuel_type || '—' }}</dd>
-                  <dt>Color</dt><dd>{{ modalVehicle.color || '—' }}</dd>
-                  <dt>Mileage</dt><dd>{{ modalVehicle.mileage != null ? modalVehicle.mileage.toLocaleString() + ' km' : '—' }}</dd>
-                  <dt>Doors</dt><dd>{{ modalVehicle.door_count ?? '—' }}</dd>
-                  <dt>Seats</dt><dd>{{ modalVehicle.seat_capacity ?? '—' }}</dd>
-                  <dt>Grade</dt><dd>{{ modalVehicle.grade || '—' }}</dd>
-                </dl>
-              </div>
-              <div v-if="modalVehicle.down_payment != null || (modalVehicle.financing_options && Object.keys(modalVehicle.financing_options).length)" class="modal-financing">
-                <h3>Financing</h3>
-                <p v-if="modalVehicle.down_payment != null">Down payment: {{ formatPrice(modalVehicle.down_payment) }} <span v-if="modalVehicle.dp_all_in">(all-in)</span></p>
-                <div v-if="modalVehicle.financing_options && Object.keys(modalVehicle.financing_options).length" class="modal-installments">
-                  <h4>Monthly installments</h4>
-                  <div class="term-buttons">
-                    <button
-                      v-for="[key, monthly] in sortedInstallments"
-                      :key="key"
-                      type="button"
-                      class="term-btn"
-                      :class="{ active: selectedTerm === key }"
-                      @click="selectedTerm = key"
-                    >
-                      {{ formatTerm(key) }}
-                    </button>
-                  </div>
-                  <div v-if="selectedTerm && modalVehicle.financing_options[selectedTerm] != null" class="monthly-amount">
-                    <span class="amount-label">Monthly payment:</span>
-                    <span class="amount-value">{{ formatPrice(modalVehicle.financing_options[selectedTerm]!) }}</span>
-                  </div>
-                </div>
+                <h3>Details & Financing</h3>
+                <div class="modal-detail-text">{{ modalVehicle.details_and_financing }}</div>
               </div>
             </template>
           </div>
@@ -662,6 +561,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .modal-specs dl { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 2rem; }
 .modal-specs dt { color: var(--color-text-muted); font-weight: 500; }
 .modal-specs dd { color: var(--color-text); }
+.modal-detail-text { white-space: pre-wrap; word-break: break-word; color: var(--color-text); font-size: 0.95rem; line-height: 1.6; }
 .modal-installments { margin-top: 1rem; }
 .modal-installments h4 { font-size: 1rem; margin: 0 0 1rem; color: var(--color-text); font-weight: 600; }
 .term-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
@@ -689,12 +589,12 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .vehicle-list {
-    padding: 0.25rem 0 0 0;
+    padding: 0;
   }
 
   h1 {
     font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+    margin: 0 0 0.5rem;
     padding: 0;
   }
 
@@ -750,7 +650,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .filter-inp {
-    width: calc(50% - 0.325rem);
+    width: 100%;
     padding: 0.7rem 0.875rem;
     font-size: 0.9rem;
   }
@@ -768,8 +668,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   .make-title {
     top: 55px;
     font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem 0;
+    margin: 0 0 0.5rem;
+    padding: 0;
   }
 
   .make-title::before,

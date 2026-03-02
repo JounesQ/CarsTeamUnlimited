@@ -11,24 +11,9 @@ export interface Vehicle {
   title: string
   slug: string
   status: string
-  year: number
   make: string
-  model: string
-  vehicle_type: string
-  category: string | null
-  transmission: string
-  fuel_type: string | null
-  color: string | null
-  door_count: number | null
-  seat_capacity: number | null
-  mileage: number | null
-  grade: string | null
   price: number
-  is_negotiable: boolean
-  down_payment: number | null
-  dp_all_in: boolean
-  financing_options: Record<string, number> | null
-  views_count: number
+  details_and_financing: string | null
   created_at: string
   updated_at: string
   images?: VehicleImage[]

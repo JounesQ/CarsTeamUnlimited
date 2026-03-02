@@ -37,12 +37,12 @@
 
     <section class="stats">
       <div class="stat">
-        <div class="stat-number">500+</div>
-        <div class="stat-label">Units released</div>
+        <div class="stat-number">10+</div>
+        <div class="stat-label">Trusted Brands</div>
       </div>
       <div class="stat">
-        <div class="stat-number">500+</div>
-        <div class="stat-label">Satisfied buyers</div>
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Transparent Pricing</div>
       </div>
       <div class="stat">
         <div class="stat-number">8AM–7PM</div>

@@ -57,30 +57,22 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 function prepareBody(form: import('@/types/vehicle').VehicleForm) {
-  const raw = form.financing_options && typeof form.financing_options === 'object' ? form.financing_options : {}
-  const financing_options = Object.fromEntries(
-    Object.entries(raw).filter(([, v]) => typeof v === 'number' && !Number.isNaN(v) && v > 0)
-  )
   const images = form.images?.length
     ? form.images
         .filter((img) => img.image_path.trim())
         .map((img, index) => ({
           image_path: img.image_path,
           position: index + 1,
+          is_primary: img.is_primary,
         }))
     : []
 
   return {
-    ...form,
-    door_count: form.door_count === '' ? null : form.door_count,
-    seat_capacity: form.seat_capacity === '' ? null : form.seat_capacity,
-    mileage: form.mileage === '' ? null : form.mileage,
-    down_payment: form.down_payment === '' ? null : form.down_payment,
-    category: form.category || null,
-    fuel_type: form.fuel_type || null,
-    color: form.color || null,
-    grade: form.grade || null,
-    financing_options: Object.keys(financing_options).length ? financing_options : null,
+    title: form.title,
+    status: form.status,
+    make: form.make,
+    price: form.price,
+    details_and_financing: form.details_and_financing?.trim() || null,
     images,
   }
 }
@@ -150,7 +142,8 @@ export const api = {
           let err: string
           try {
             const j = JSON.parse(text)
-            err = j.message || JSON.stringify(j.errors || j)
+            const imgErr = j.errors?.image
+            err = Array.isArray(imgErr) ? imgErr[0] : imgErr || j.message || JSON.stringify(j.errors || j)
           } catch {
             err = text || res.statusText
           }

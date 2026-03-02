@@ -16,6 +16,7 @@ const makeFilter = ref((route.query.make as string) || '')
 // Modal state
 const modalOpen = ref(false)
 const selectedVehicle = ref<Vehicle | null>(null)
+const carouselIndex = ref(0)
 const editingStatus = ref(false)
 const newStatus = ref('')
 const actionLoading = ref(false)
@@ -49,6 +50,27 @@ function primaryImage(v: Vehicle) {
   const img = v.images?.find((i) => i.is_primary) || v.images?.[0]
   const path = img?.image_path || ''
   return path ? imageUrl(path) : ''
+}
+
+function sortedImages(v: Vehicle) {
+  const imgs = v.images ?? []
+  return [...imgs].sort((a, b) => a.position - b.position)
+}
+
+function imageSrc(path: string) {
+  return path ? imageUrl(path) : ''
+}
+
+function carouselPrev() {
+  const imgs = selectedVehicle.value ? sortedImages(selectedVehicle.value) : []
+  if (imgs.length <= 1) return
+  carouselIndex.value = (carouselIndex.value - 1 + imgs.length) % imgs.length
+}
+
+function carouselNext() {
+  const imgs = selectedVehicle.value ? sortedImages(selectedVehicle.value) : []
+  if (imgs.length <= 1) return
+  carouselIndex.value = (carouselIndex.value + 1) % imgs.length
 }
 
 function formatPrice(n: number) {
@@ -89,6 +111,7 @@ async function load(page = 1) {
 
 function openModal(vehicle: Vehicle) {
   selectedVehicle.value = vehicle
+  carouselIndex.value = 0
   newStatus.value = vehicle.status
   editingStatus.value = false
   selectedTerm.value = null
@@ -138,25 +161,10 @@ async function handleConfirm() {
 function vehicleToForm(v: Vehicle): VehicleForm {
   return {
     title: v.title,
-    slug: v.slug,
     status: v.status,
-    year: v.year,
     make: v.make,
-    model: v.model,
-    vehicle_type: v.vehicle_type,
-    category: v.category ?? '',
-    transmission: v.transmission,
-    fuel_type: v.fuel_type ?? '',
-    color: v.color ?? '',
-    door_count: v.door_count ?? '',
-    seat_capacity: v.seat_capacity ?? '',
-    mileage: v.mileage ?? '',
-    grade: v.grade ?? '',
-    price: v.price,
-    is_negotiable: v.is_negotiable,
-    down_payment: v.down_payment ?? '',
-    dp_all_in: v.dp_all_in,
-    financing_options: v.financing_options ?? {},
+    price: v.price ?? 0,
+    details_and_financing: v.details_and_financing || '',
     images: v.images?.map((i) => ({ image_path: i.image_path, position: i.position, is_primary: i.is_primary })) ?? [],
   }
 }
@@ -301,7 +309,7 @@ onMounted(() => {
         <div v-if="modalOpen && selectedVehicle" class="modal-overlay" @click.self="closeModal">
           <div class="modal-box" @click.stop>
             <div class="modal-header">
-              <h2>{{ selectedVehicle.year }} {{ selectedVehicle.make }} {{ selectedVehicle.model }}</h2>
+              <h2>{{ selectedVehicle.title || selectedVehicle.make }}</h2>
               <button class="modal-close" @click="closeModal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -311,9 +319,35 @@ onMounted(() => {
             </div>
 
             <div class="modal-body">
-              <div class="modal-image">
-                <img v-if="primaryImage(selectedVehicle)" :src="primaryImage(selectedVehicle)" :alt="selectedVehicle.title" />
-                <div v-else class="no-image">No image</div>
+              <div class="modal-carousel">
+                <template v-if="sortedImages(selectedVehicle).length">
+                  <button
+                    v-if="sortedImages(selectedVehicle).length > 1"
+                    type="button"
+                    class="carousel-btn carousel-prev"
+                    aria-label="Previous image"
+                    @click="carouselPrev"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <div class="carousel-main">
+                    <img
+                      :src="imageSrc(sortedImages(selectedVehicle)[carouselIndex]?.image_path)"
+                      :alt="`${selectedVehicle.title} - image ${carouselIndex + 1}`"
+                    />
+                  </div>
+                  <button
+                    v-if="sortedImages(selectedVehicle).length > 1"
+                    type="button"
+                    class="carousel-btn carousel-next"
+                    aria-label="Next image"
+                    @click="carouselNext"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                  <span v-if="sortedImages(selectedVehicle).length > 1" class="carousel-counter">{{ carouselIndex + 1 }} / {{ sortedImages(selectedVehicle).length }}</span>
+                </template>
+                <div v-else class="no-image">No images</div>
               </div>
 
               <div class="modal-details">
@@ -351,75 +385,11 @@ onMounted(() => {
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Price:</span>
-                  <span class="detail-value price">{{ formatPrice(selectedVehicle.price) }} <span v-if="selectedVehicle.is_negotiable" class="neg">(negotiable)</span></span>
+                  <span class="detail-value price">{{ formatPrice(selectedVehicle.price) }}</span>
                 </div>
-                <div class="detail-row">
-                  <span class="detail-label">Year:</span>
-                  <span class="detail-value">{{ selectedVehicle.year }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Type:</span>
-                  <span class="detail-value">{{ selectedVehicle.vehicle_type || '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Category:</span>
-                  <span class="detail-value">{{ selectedVehicle.category || '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Transmission:</span>
-                  <span class="detail-value">{{ selectedVehicle.transmission || '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Fuel:</span>
-                  <span class="detail-value">{{ selectedVehicle.fuel_type || '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Color:</span>
-                  <span class="detail-value">{{ selectedVehicle.color || '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Mileage:</span>
-                  <span class="detail-value">{{ selectedVehicle.mileage != null ? selectedVehicle.mileage.toLocaleString() + ' km' : '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Doors:</span>
-                  <span class="detail-value">{{ selectedVehicle.door_count ?? '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Seats:</span>
-                  <span class="detail-value">{{ selectedVehicle.seat_capacity ?? '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Grade:</span>
-                  <span class="detail-value">{{ selectedVehicle.grade || '—' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Views:</span>
-                  <span class="detail-value">{{ selectedVehicle.views_count }}</span>
-                </div>
-              </div>
-
-              <div v-if="selectedVehicle.down_payment != null || (selectedVehicle.financing_options && Object.keys(selectedVehicle.financing_options).length)" class="modal-financing">
-                <h3>Financing</h3>
-                <p v-if="selectedVehicle.down_payment != null">Down payment: {{ formatPrice(selectedVehicle.down_payment) }} <span v-if="selectedVehicle.dp_all_in">(all-in)</span></p>
-                <div v-if="selectedVehicle.financing_options && Object.keys(selectedVehicle.financing_options).length" class="modal-installments">
-                  <h4>Monthly installments</h4>
-                  <div class="term-buttons">
-                    <button
-                      v-for="[key, monthly] in sortedInstallments"
-                      :key="key"
-                      type="button"
-                      class="term-btn"
-                      :class="{ active: selectedTerm === key }"
-                      @click="selectedTerm = key"
-                    >
-                      {{ formatTerm(key) }}
-                    </button>
-                  </div>
-                  <div v-if="selectedTerm && selectedVehicle.financing_options[selectedTerm] != null" class="monthly-amount">
-                    <span class="amount-label">Monthly payment:</span>
-                    <span class="amount-value">{{ formatPrice(selectedVehicle.financing_options[selectedTerm]!) }}</span>
-                  </div>
+                <div v-if="selectedVehicle.details_and_financing" class="detail-block">
+                  <span class="detail-label">Details & Financing</span>
+                  <div class="detail-text">{{ selectedVehicle.details_and_financing }}</div>
                 </div>
               </div>
 
@@ -599,9 +569,10 @@ onMounted(() => {
   padding: 2rem;
 }
 
-.modal-image {
+.modal-carousel {
+  position: relative;
   width: 100%;
-  height: 300px;
+  aspect-ratio: 16/10;
   border-radius: 12px;
   overflow: hidden;
   background: var(--color-background-mute);
@@ -609,13 +580,60 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
-.modal-image img {
+.carousel-main {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.no-image {
+.carousel-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-soft);
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: all 0.2s;
+}
+
+.carousel-btn:hover {
+  background: var(--gold-primary);
+  color: #000;
+  border-color: var(--gold-primary);
+}
+
+.carousel-prev { left: 0.5rem; }
+.carousel-next { right: 0.5rem; }
+
+.carousel-counter {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.75rem;
+  background: rgba(0,0,0,0.6);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.modal-carousel .no-image {
   width: 100%;
   height: 100%;
   display: flex;
@@ -623,6 +641,23 @@ onMounted(() => {
   justify-content: center;
   color: var(--color-text-muted);
   font-size: 1.1rem;
+}
+
+.detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--color-background-mute);
+  border-radius: 8px;
+}
+
+.detail-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .modal-details {
@@ -915,9 +950,17 @@ onMounted(() => {
     padding: 1rem;
   }
 
-  .modal-image {
-    height: 200px;
+  .modal-carousel {
+    aspect-ratio: 4/3;
   }
+
+  .carousel-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .carousel-prev { left: 0.25rem; }
+  .carousel-next { right: 0.25rem; }
 
   .modal-actions {
     flex-direction: column;

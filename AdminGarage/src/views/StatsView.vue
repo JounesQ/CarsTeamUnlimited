@@ -8,7 +8,7 @@ const stats = ref<VehicleStats | null>(null)
 const loading = ref(true)
 const error = ref('')
 
-const selectedFilter = ref<'total' | 'available' | 'sold' | 'reserved' | 'coming'>('total')
+const selectedFilter = ref<'total' | 'available'>('total')
 const vehiclesForFilter = ref<Vehicle[]>([])
 const loadingVehicles = ref(false)
 
@@ -40,7 +40,7 @@ async function load() {
   }
 }
 
-async function selectFilter(filter: 'total' | 'available' | 'sold' | 'reserved' | 'coming') {
+async function selectFilter(filter: 'total' | 'available') {
   if (selectedFilter.value === filter) {
     filter = 'total'
   }
@@ -101,62 +101,6 @@ onMounted(load)
         >
           <span class="stat-label">Available</span>
           <span class="stat-value">{{ stats.available }}</span>
-        </div>
-        <div
-          class="stat-card stat-sold clickable-stat"
-          :class="{ active: selectedFilter === 'sold' }"
-          role="button"
-          tabindex="0"
-          @click="selectFilter('sold')"
-          @keydown.enter="selectFilter('sold')"
-        >
-          <span class="stat-label">Sold</span>
-          <span class="stat-value">{{ stats.sold }}</span>
-        </div>
-        <div
-          class="stat-card stat-reserved clickable-stat"
-          :class="{ active: selectedFilter === 'reserved' }"
-          role="button"
-          tabindex="0"
-          @click="selectFilter('reserved')"
-          @keydown.enter="selectFilter('reserved')"
-        >
-          <span class="stat-label">Reserved</span>
-          <span class="stat-value">{{ stats.reserved }}</span>
-        </div>
-        <div
-          class="stat-card stat-coming clickable-stat"
-          :class="{ active: selectedFilter === 'coming' }"
-          role="button"
-          tabindex="0"
-          @click="selectFilter('coming')"
-          @keydown.enter="selectFilter('coming')"
-        >
-          <span class="stat-label">Coming</span>
-          <span class="stat-value">{{ stats.coming }}</span>
-        </div>
-      </div>
-
-      <div class="stats-extra">
-        <div class="stat-card stat-value-card stat-total">
-          <span class="stat-label">Total Value (All Vehicles)</span>
-          <span class="stat-value stat-price">{{ formatPrice(stats.total_value_all) }}</span>
-        </div>
-        <div class="stat-card stat-value-card stat-available">
-          <span class="stat-label">Total Value (Available)</span>
-          <span class="stat-value stat-price">{{ formatPrice(stats.total_value) }}</span>
-        </div>
-        <div class="stat-card stat-value-card stat-sold">
-          <span class="stat-label">Total Value (Sold)</span>
-          <span class="stat-value stat-price">{{ formatPrice(stats.total_value_sold) }}</span>
-        </div>
-        <div class="stat-card stat-value-card stat-reserved">
-          <span class="stat-label">Total Value (Reserved)</span>
-          <span class="stat-value stat-price">{{ formatPrice(stats.total_value_reserved) }}</span>
-        </div>
-        <div class="stat-card stat-value-card stat-coming">
-          <span class="stat-label">Total Value (Coming)</span>
-          <span class="stat-value stat-price">{{ formatPrice(stats.total_value_coming) }}</span>
         </div>
       </div>
 
@@ -277,9 +221,9 @@ onMounted(load)
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .stat-card {
@@ -324,28 +268,6 @@ onMounted(load)
 
 .stat-total .stat-value { color: var(--gold-primary); }
 .stat-available .stat-value { color: #48bb78; }
-.stat-sold .stat-value { color: #f56565; }
-.stat-reserved .stat-value { color: #4299e1; }
-.stat-coming .stat-value { color: #9f7aea; }
-
-.stat-value-card .stat-value.stat-price {
-  font-size: 1.5rem;
-  color: var(--gold-primary);
-}
-
-.stats-extra {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-  width: 100%;
-}
-
-.stats-extra .stat-value-card.stat-total .stat-price { color: var(--gold-primary); font-size: 1.6rem; }
-.stats-extra .stat-value-card.stat-available .stat-price { color: #48bb78; }
-.stats-extra .stat-value-card.stat-sold .stat-price { color: #f56565; }
-.stats-extra .stat-value-card.stat-reserved .stat-price { color: #4299e1; }
-.stats-extra .stat-value-card.stat-coming .stat-price { color: #9f7aea; }
 
 .bottom-section {
   margin-top: 1rem;
@@ -472,15 +394,6 @@ onMounted(load)
 
   .stat-value {
     font-size: 1.5rem;
-  }
-
-  .stat-value-card .stat-value.stat-price {
-    font-size: 1.25rem;
-  }
-
-  .stats-extra {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
   }
 
   .vehicle-grid {

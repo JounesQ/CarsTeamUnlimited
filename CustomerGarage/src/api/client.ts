@@ -52,23 +52,15 @@ export const api = {
     page?: number
     per_page?: number
     make?: string
-    year?: number
     min_price?: number
     max_price?: number
-    vehicle_type?: string
-    category?: string
-    fuel_type?: string
   }) {
     const sp = new URLSearchParams()
     if (params?.page) sp.set('page', String(params.page))
     if (params?.per_page) sp.set('per_page', String(params.per_page))
     if (params?.make) sp.set('make', params.make)
-    if (params?.year) sp.set('year', String(params.year))
     if (params?.min_price != null) sp.set('min_price', String(params.min_price))
     if (params?.max_price != null) sp.set('max_price', String(params.max_price))
-    if (params?.vehicle_type) sp.set('vehicle_type', params.vehicle_type)
-    if (params?.category) sp.set('category', params.category)
-    if (params?.fuel_type) sp.set('fuel_type', params.fuel_type)
     const q = sp.toString()
     return request<import('@/types/vehicle').Paginated<import('@/types/vehicle').Vehicle>>('/vehicles' + (q ? `?${q}` : ''))
   },

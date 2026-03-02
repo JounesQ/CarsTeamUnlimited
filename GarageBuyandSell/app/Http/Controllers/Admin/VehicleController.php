@@ -39,7 +39,10 @@ class VehicleController extends Controller
 
         $vehicle = new Vehicle();
         $vehicle->id = (string) Str::uuid();
+        $vehicle->title = $validated['title'];
         $vehicle->slug = Str::slug($validated['title']) . '-' . substr($vehicle->id, 0, 8);
+        $vehicle->status = $validated['status'] ?? 'available';
+        $vehicle->make = $validated['make'];
         $this->fillVehicle($vehicle, $validated);
         $vehicle->save();
 
@@ -65,11 +68,11 @@ class VehicleController extends Controller
         $reserved = (int) ($byStatus['reserved'] ?? 0);
         $coming = (int) ($byStatus['coming'] ?? 0);
 
-        $totalValueAll = (float) Vehicle::sum('price');
-        $totalValueAvailable = (float) Vehicle::where('status', 'available')->sum('price');
-        $totalValueSold = (float) Vehicle::where('status', 'sold')->sum('price');
-        $totalValueReserved = (float) Vehicle::where('status', 'reserved')->sum('price');
-        $totalValueComing = (float) Vehicle::where('status', 'coming')->sum('price');
+        $totalValueAll = 0;
+        $totalValueAvailable = 0;
+        $totalValueSold = 0;
+        $totalValueReserved = 0;
+        $totalValueComing = 0;
         $byMake = Vehicle::selectRaw('make, count(*) as count')
             ->groupBy('make')
             ->orderByDesc('count')
@@ -109,7 +112,10 @@ class VehicleController extends Controller
         $vehicle = Vehicle::findOrFail($id);
         $validated = $this->validateVehicle($request, $vehicle);
 
+        $vehicle->title = $validated['title'];
         $vehicle->slug = $validated['slug'] ?? (Str::slug($validated['title']) . '-' . substr($vehicle->id, 0, 8));
+        $vehicle->status = $validated['status'] ?? $vehicle->status;
+        $vehicle->make = $validated['make'];
         $this->fillVehicle($vehicle, $validated);
         $vehicle->save();
 
@@ -122,19 +128,39 @@ class VehicleController extends Controller
     /**
      * Upload an image file; returns storage path or full URL for use in vehicle images.
      * Uses Supabase when configured, otherwise public disk.
+     * Falls back to public disk if Supabase fails (e.g. cURL SSL error 60 on Windows).
      */
     public function uploadImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:10240',
+        ], [
+            'image.required' => 'No image file was uploaded.',
+            'image.image' => 'File must be an image (JPEG, PNG, GIF, WebP).',
+            'image.mimes' => 'Image must be JPEG, PNG, GIF, or WebP.',
+            'image.max' => 'Image must be under 10 MB. If uploads fail, increase upload_max_filesize in php.ini.',
         ]);
         $file = $request->file('image');
-        $disk = config('filesystems.disks.supabase.key') ? 'supabase' : 'public';
-        $path = $file->store('vehicles', $disk);
+        $useSupabase = config('filesystems.disks.supabase.key');
 
-        if ($disk === 'supabase') {
-            $path = Storage::disk('supabase')->getAdapter()->getPublicUrl($path);
+        if ($useSupabase) {
+            try {
+                $path = $file->store('vehicles', 'supabase');
+                $path = Storage::disk('supabase')->getAdapter()->getPublicUrl($path);
+
+                return response()->json(['path' => $path]);
+            } catch (\Throwable $e) {
+                if (str_contains($e->getMessage(), 'SSL certificate') || str_contains($e->getMessage(), 'cURL error 60')) {
+                    // Fall back to local storage when SSL verification fails (common on Windows)
+                    $path = $file->store('vehicles', 'public');
+
+                    return response()->json(['path' => $path]);
+                }
+                throw $e;
+            }
         }
+
+        $path = $file->store('vehicles', 'public');
 
         return response()->json(['path' => $path]);
     }
@@ -160,23 +186,8 @@ class VehicleController extends Controller
             'title' => 'required|string|max:200',
             'slug' => 'nullable|string|max:200|' . $slugRule,
             'status' => 'nullable|string|in:available,sold,reserved,coming',
-            'year' => 'required|integer|min:1900|max:2100',
             'make' => 'required|string|max:50',
-            'model' => 'required|string|max:50',
-            'vehicle_type' => 'nullable|string|max:20',
-            'category' => 'nullable|string|max:50',
-            'transmission' => 'nullable|string|max:30',
-            'fuel_type' => 'nullable|string|max:30',
-            'color' => 'nullable|string|max:50',
-            'door_count' => 'nullable|integer|min:0',
-            'seat_capacity' => 'nullable|integer|min:0',
-            'mileage' => 'nullable|integer|min:0',
-            'grade' => 'nullable|string|max:50',
-            'price' => 'required|numeric|min:0',
-            'is_negotiable' => 'nullable|boolean',
-            'down_payment' => 'nullable|numeric|min:0',
-            'dp_all_in' => 'nullable|boolean',
-            'financing_options' => 'nullable|array',
+            'details_and_financing' => 'nullable|string|max:65535',
             'images' => 'nullable|array',
             'images.*.image_path' => 'required_with:images|string|max:255',
             'images.*.position' => 'nullable|integer|min:1|max:10',
@@ -186,25 +197,7 @@ class VehicleController extends Controller
 
     private function fillVehicle(Vehicle $vehicle, array $data): void
     {
-        $vehicle->title = $data['title'];
-        $vehicle->status = $data['status'] ?? 'available';
-        $vehicle->year = (int) $data['year'];
-        $vehicle->make = $data['make'];
-        $vehicle->model = $data['model'];
-        $vehicle->vehicle_type = $data['vehicle_type'] ?? 'car';
-        $vehicle->category = $data['category'] ?? null;
-        $vehicle->transmission = $data['transmission'] ?? 'automatic';
-        $vehicle->fuel_type = $data['fuel_type'] ?? null;
-        $vehicle->color = $data['color'] ?? null;
-        $vehicle->door_count = isset($data['door_count']) ? (int) $data['door_count'] : null;
-        $vehicle->seat_capacity = isset($data['seat_capacity']) ? (int) $data['seat_capacity'] : null;
-        $vehicle->mileage = isset($data['mileage']) ? (int) $data['mileage'] : null;
-        $vehicle->grade = $data['grade'] ?? null;
-        $vehicle->price = (float) $data['price'];
-        $vehicle->is_negotiable = $data['is_negotiable'] ?? true;
-        $vehicle->down_payment = isset($data['down_payment']) ? (float) $data['down_payment'] : null;
-        $vehicle->dp_all_in = $data['dp_all_in'] ?? true;
-        $vehicle->financing_options = $data['financing_options'] ?? null;
+        $vehicle->details_and_financing = $data['details_and_financing'] ?? null;
     }
 
     private function syncImages(Vehicle $vehicle, array $images): void

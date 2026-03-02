@@ -93,13 +93,13 @@ onMounted(async () => {
     <div class="stats-section">
       <div class="stats-container">
         <div class="stat-item">
-          <div class="stat-number">500+</div>
-          <div class="stat-label">Vehicles Sold</div>
+          <div class="stat-number">10+</div>
+          <div class="stat-label">Trusted Brands</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <div class="stat-number">500+</div>
-          <div class="stat-label">Happy Customers</div>
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Transparent Pricing</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
@@ -155,7 +155,7 @@ onMounted(async () => {
                   <span class="social-label">You may also connect with us via:</span>
                   <div class="social-buttons">
                     <a
-                      href="https://www.facebook.com/michaeltiposo12"
+                      href="https://www.facebook.com/P7garahe"
                       target="_blank"
                       rel="noopener noreferrer"
                       class="social-link"

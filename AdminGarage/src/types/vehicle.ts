@@ -18,15 +18,11 @@ export interface Vehicle {
   category: string | null
   transmission: string
   fuel_type: string | null
-  color: string | null
-  door_count: number | null
-  seat_capacity: number | null
-  mileage: number | null
-  grade: string | null
   price: number
   is_negotiable: boolean
   down_payment: number | null
   dp_all_in: boolean
+  details_and_financing: string | null
   financing_options: Record<string, number> | null
   views_count: number
   created_at: string
@@ -36,25 +32,10 @@ export interface Vehicle {
 
 export interface VehicleForm {
   title: string
-  slug?: string
   status: string
-  year: number
   make: string
-  model: string
-  vehicle_type: string
-  category: string
-  transmission: string
-  fuel_type: string
-  color: string
-  door_count: number | ''
-  seat_capacity: number | ''
-  mileage: number | ''
-  grade: string
   price: number
-  is_negotiable: boolean
-  down_payment: number | ''
-  dp_all_in: boolean
-  financing_options: Record<string, number>
+  details_and_financing: string
   images: { image_path: string; position: number; is_primary: boolean }[]
 }
 

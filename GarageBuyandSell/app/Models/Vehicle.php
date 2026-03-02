@@ -17,30 +17,9 @@ class Vehicle extends Model
         'title',
         'slug',
         'status',
-        'year',
         'make',
-        'model',
-        'vehicle_type',
-        'category',
-        'transmission',
-        'fuel_type',
-        'color',
-        'door_count',
-        'seat_capacity',
-        'mileage',
-        'grade',
         'price',
-        'is_negotiable',
-        'down_payment',
-        'dp_all_in',
-        'financing_options',
-        'views_count',
-    ];
-
-    protected $casts = [
-        'is_negotiable' => 'boolean',
-        'dp_all_in' => 'boolean',
-        'financing_options' => 'array',
+        'details_and_financing',
     ];
 
     public function images()
