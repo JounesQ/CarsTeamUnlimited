@@ -187,6 +187,7 @@ class VehicleController extends Controller
             'slug' => 'nullable|string|max:200|' . $slugRule,
             'status' => 'nullable|string|in:available,sold,reserved,coming',
             'make' => 'required|string|max:50',
+            'price' => 'required|numeric|min:0',
             'details_and_financing' => 'nullable|string|max:65535',
             'images' => 'nullable|array',
             'images.*.image_path' => 'required_with:images|string|max:255',
@@ -197,6 +198,7 @@ class VehicleController extends Controller
 
     private function fillVehicle(Vehicle $vehicle, array $data): void
     {
+        $vehicle->price = (int) ($data['price'] ?? 0);
         $vehicle->details_and_financing = $data['details_and_financing'] ?? null;
     }
 
