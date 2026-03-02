@@ -437,7 +437,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  max-width: 90vw;
+  max-width: 700px;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   overflow-x: hidden;
@@ -507,10 +508,11 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .modal-gallery { position: relative; z-index: 1; padding: 1.5rem 2rem; }
 .modal-main-img {
   position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
   border-radius: 12px;
   background: var(--color-background-mute);
   border: 1px solid var(--color-border);
-  max-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -518,10 +520,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 }
 .modal-main-img img,
 .modal-main-img .no-img {
-  max-width: 100%;
-  max-height: 60vh;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 .no-img { display: flex; align-items: center; justify-content: center; color: var(--color-text); }
@@ -666,7 +666,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   }
 
   .make-title {
-    top: 55px;
+    top: 50px;
     font-size: 1.1rem;
     margin: 0 0 0.5rem;
     padding: 0;
@@ -756,10 +756,6 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
   .modal-gallery {
     padding: 0.5rem 0.5rem;
-  }
-
-  .modal-main-img {
-    max-height: 50vh;
   }
 
   .carousel-btn {

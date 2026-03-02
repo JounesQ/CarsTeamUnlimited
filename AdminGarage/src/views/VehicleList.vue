@@ -289,7 +289,7 @@ onMounted(() => {
                 <span v-else>—</span>
               </div>
             </td>
-            <td>{{ v.year }} {{ v.make }} {{ v.model }}</td>
+            <td>{{ v.title }} </td>
             <td><span class="badge" :class="v.status">{{ v.status }}</span></td>
             <td>{{ formatPrice(v.price) }}</td>
             <td>{{ v.views_count }}</td>
