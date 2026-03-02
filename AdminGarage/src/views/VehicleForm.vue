@@ -463,17 +463,21 @@ onMounted(() => loadVehicle())
 @media (max-width: 768px) {
   .admin-form {
     max-width: none;
-    padding: 0.25rem 0;
+    padding: 0;
   }
 
   .form-header {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
 
   .form-header h1 {
     font-size: 1.25rem;
+  }
+
+  .form-header .btn {
+    width: 100%;
   }
 
   .form-grid {

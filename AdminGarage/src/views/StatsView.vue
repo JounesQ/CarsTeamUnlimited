@@ -375,7 +375,13 @@ onMounted(load)
 
 @media (max-width: 768px) {
   .stats-page {
-    padding: 0.5rem 0.25rem;
+    padding: 0;
+  }
+
+  .stats-header {
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .stats-header h1 {
@@ -394,6 +400,14 @@ onMounted(load)
 
   .stat-value {
     font-size: 1.5rem;
+  }
+
+  .bottom-section {
+    margin-top: 0.5rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.1rem;
   }
 
   .vehicle-grid {

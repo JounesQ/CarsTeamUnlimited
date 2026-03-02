@@ -887,11 +887,11 @@ onMounted(() => {
 @media (max-width: 768px) {
   .admin-list {
     max-width: none;
-    padding: 0.25rem 0;
+    padding: 0;
   }
 
   .admin-header {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
@@ -901,14 +901,19 @@ onMounted(() => {
   }
 
   .filters {
-    padding: 0.5rem;
-    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
     gap: 0.5rem;
+    flex-direction: column;
   }
 
   .filter-inp {
     width: 100%;
-    min-width: 100px;
+    min-width: unset;
+  }
+
+  .filters .btn {
+    width: 100%;
   }
 
   .table-wrap {
