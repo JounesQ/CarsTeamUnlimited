@@ -1,8 +1,6 @@
 export const MAKES = [
-  'Audi', 'BAIC', 'BMW', 'BYD', 'Chevrolet', 'Changan', 'Ford',
-  'GAC', 'Geely', 'GMC', 'Honda', 'Hyundai', 'Isuzu', 'Jeep', 'Kia', 'Lexus', 'Mazda',
-  'Mini', 'Mitsubishi', 'Nissan', 'Subaru', 'Suzuki', 'Tesla',
-  'Toyota', 'Other',
+  'Honda', 'Hyundai','Mitsubishi', 'Nissan', 'Suzuki',
+  'Toyota', 
 ] as const
 
 export const VEHICLE_TYPES = [

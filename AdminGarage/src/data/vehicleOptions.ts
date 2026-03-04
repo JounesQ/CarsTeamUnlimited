@@ -1,7 +1,6 @@
 export const MAKES = [
-   'Honda', 'Hyundai', 'Isuzu', 'Kia',
-   'Mitsubishi', 'Nissan', 'Suzuki',
-  'Toyota'
+   'Honda', 'Hyundai','Mitsubishi', 'Nissan', 'Suzuki',
+   'Toyota'
 ] as const
 
 export const VEHICLE_TYPES = [
