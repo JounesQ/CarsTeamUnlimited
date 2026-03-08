@@ -151,6 +151,8 @@ onMounted(async () => {
                 <h3>Phone</h3>
                 <p>+63 956 556 7542</p>
                 <p>+63 948 485 4047</p>
+                <p>+63 955 231 4607</p>
+                <p>+63 966 411 8317</p>
                 <div class="social-links">
                   <span class="social-label">You may also connect with us via:</span>
                   <div class="social-buttons">
