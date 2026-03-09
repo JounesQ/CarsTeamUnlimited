@@ -20,6 +20,7 @@ class Vehicle extends Model
         'make',
         'price',
         'details_and_financing',
+        'views_count',
     ];
 
     public function images()

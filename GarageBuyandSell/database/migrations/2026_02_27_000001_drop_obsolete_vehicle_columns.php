@@ -29,7 +29,6 @@ return new class extends Migration
             'down_payment',
             'dp_all_in',
             'financing_options',
-            'views_count',
         ];
 
         $existing = array_values(array_filter($obsoleteColumns, fn ($col) => Schema::hasColumn('vehicles', $col)));

@@ -30,10 +30,12 @@ class VehicleController extends Controller
 
     /**
      * Show a single vehicle (public).
+     * Increments views_count when viewed from CustomerGarage.
      */
     public function show(string $id)
     {
         $vehicle = Vehicle::with('images')->where('status', 'available')->findOrFail($id);
+        $vehicle->increment('views_count');
         $vehicle->load('images');
         return $vehicle;
     }

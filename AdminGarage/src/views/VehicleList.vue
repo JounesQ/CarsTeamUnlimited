@@ -292,7 +292,7 @@ onMounted(() => {
             <td>{{ v.title }} </td>
             <td><span class="badge" :class="v.status">{{ v.status }}</span></td>
             <td>{{ formatPrice(v.price) }}</td>
-            <td>{{ v.views_count }}</td>
+            <td>{{ v.views_count ?? 0 }}</td>
           </tr>
         </tbody>
       </table>
@@ -386,6 +386,10 @@ onMounted(() => {
                 <div class="detail-row">
                   <span class="detail-label">Price:</span>
                   <span class="detail-value price">{{ formatPrice(selectedVehicle.price) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Views:</span>
+                  <span class="detail-value">{{ selectedVehicle.views_count ?? 0 }}</span>
                 </div>
                 <div v-if="selectedVehicle.details_and_financing" class="detail-block">
                   <span class="detail-label">Details & Financing</span>
