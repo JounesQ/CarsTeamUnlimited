@@ -52,6 +52,7 @@ export const api = {
     page?: number
     per_page?: number
     make?: string
+    status?: string
     min_price?: number
     max_price?: number
   }) {
@@ -59,6 +60,7 @@ export const api = {
     if (params?.page) sp.set('page', String(params.page))
     if (params?.per_page) sp.set('per_page', String(params.per_page))
     if (params?.make) sp.set('make', params.make)
+    if (params?.status) sp.set('status', params.status)
     if (params?.min_price != null) sp.set('min_price', String(params.min_price))
     if (params?.max_price != null) sp.set('max_price', String(params.max_price))
     const q = sp.toString()

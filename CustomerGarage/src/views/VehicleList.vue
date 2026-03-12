@@ -10,6 +10,14 @@ const route = useRoute()
 const cachedVehicles = useCachedVehicles()
 const vehicles = ref<Vehicle[]>([])
 const make = ref((route.query.make as string) || '')
+const status = ref((route.query.status as string) || '')
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'All statuses' },
+  { value: 'available', label: 'Available' },
+  { value: 'reserved', label: 'Reserved' },
+  { value: 'coming', label: 'Coming' },
+]
 
 // Inject mobile filters visibility from parent
 const showMobileFilters = inject<any>('showMobileFilters', ref(false))
@@ -118,6 +126,7 @@ function handleCloseModal() {
 async function load() {
   const params: Record<string, string | number> = { per_page: 500 }
   if (make.value) params.make = make.value
+  if (status.value) params.status = status.value
 
   await cachedVehicles.load({
     params,
@@ -152,10 +161,11 @@ onUnmounted(() => {
 // Sync filters from URL (e.g. back/forward, direct link); applyFilters() will run via ref watch and load
 watch(() => route.query, (q) => {
   make.value = (q.make as string) || ''
+  status.value = (q.status as string) || ''
 }, { immediate: false })
 
 // Auto-search when any filter changes (no Search button click needed)
-watch([make], () => {
+watch([make, status], () => {
   applyFilters()
 }, { deep: true })
 </script>
@@ -167,6 +177,9 @@ watch([make], () => {
       <select v-model="make" class="filter-inp">
         <option value="">All makes</option>
         <option v-for="m in MAKES" :key="m" :value="m">{{ m }}</option>
+      </select>
+      <select v-model="status" class="filter-inp">
+        <option v-for="opt in STATUS_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
       </select>
     </div>
     <!-- Skeleton loading (first load) -->
@@ -217,7 +230,7 @@ watch([make], () => {
               <h3 class="card-title">{{ v.title || v.make }}</h3>
               <div class="card-footer">
                 <p class="card-price">{{ formatPrice(v.price) }}</p>
-                <span v-if="v.status === 'available'" class="status-badge">Available</span>
+                <span v-if="['available','reserved','coming'].includes(v.status)" class="status-badge" :class="v.status">{{ formatStatus(v.status) }}</span>
               </div>
             </div>
           </li>
@@ -415,7 +428,10 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .card-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-size: 0.9rem; }
 .card-body { padding: 1.25rem; }
 .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
-.status-badge { padding: 0.375rem 0.75rem; background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 6px; white-space: nowrap; }
+.status-badge { padding: 0.375rem 0.75rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 6px; white-space: nowrap; }
+.status-badge.available { background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; }
+.status-badge.reserved { background: rgba(204, 47, 20, 0.25); color:rgb(212, 39, 8); }
+.status-badge.coming { background: rgba(12, 236, 53, 0.25); color:rgb(53, 231, 109); }
 .card-title { font-size: 1.05rem; margin: 0 0 0.5rem; color: var(--color-text); font-weight: 600; }
 .card-price { font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--gold-primary); }
 .card-meta { font-size: 0.85rem; margin: 0; color: var(--color-text-muted); }

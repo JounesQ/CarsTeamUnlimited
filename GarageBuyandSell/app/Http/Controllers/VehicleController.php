@@ -8,11 +8,17 @@ use Illuminate\Http\Request;
 class VehicleController extends Controller
 {
     /**
-     * List vehicles (public, available only).
+     * List vehicles (public: available, reserved, coming).
      */
     public function index(Request $request)
     {
-        $query = Vehicle::with('images')->where('status', 'available')->orderByDesc('created_at');
+        $statuses = ['available', 'reserved', 'coming'];
+        if ($request->filled('status') && in_array($request->status, $statuses, true)) {
+            $statuses = [$request->status];
+        }
+        $query = Vehicle::with('images')
+            ->whereIn('status', $statuses)
+            ->orderByDesc('created_at');
 
         if ($request->filled('make')) {
             $query->where('make', 'like', '%' . $request->make . '%');
@@ -34,7 +40,9 @@ class VehicleController extends Controller
      */
     public function show(string $id)
     {
-        $vehicle = Vehicle::with('images')->where('status', 'available')->findOrFail($id);
+        $vehicle = Vehicle::with('images')
+            ->whereIn('status', ['available', 'reserved', 'coming'])
+            ->findOrFail($id);
         $vehicle->increment('views_count');
         $vehicle->load('images');
         return $vehicle;

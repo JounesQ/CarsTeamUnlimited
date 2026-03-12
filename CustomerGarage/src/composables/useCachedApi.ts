@@ -18,6 +18,7 @@ interface CachedVehiclesOptions {
     page?: number
     per_page?: number
     make?: string
+    status?: string
     year?: number
     min_price?: number
     max_price?: number

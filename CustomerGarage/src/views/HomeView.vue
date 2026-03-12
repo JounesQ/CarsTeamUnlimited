@@ -8,7 +8,7 @@ const availableCount = ref<number | null>(null)
 
 onMounted(async () => {
   try {
-    const res = await api.getVehicles({ per_page: 1 })
+    const res = await api.getVehicles({ per_page: 1, status: 'available' })
     availableCount.value = res.total
   } catch {
     availableCount.value = null
