@@ -2,6 +2,7 @@ export interface VehicleImage {
   id: number
   vehicle_id: string
   image_path: string
+  image_url?: string
   position: number
   is_primary: boolean
 }
@@ -36,7 +37,7 @@ export interface VehicleForm {
   make: string
   price: number
   details_and_financing: string
-  images: { image_path: string; position: number; is_primary: boolean }[]
+  images: { image_path: string; image_url?: string; position: number; is_primary: boolean }[]
 }
 
 export interface Paginated<T> {

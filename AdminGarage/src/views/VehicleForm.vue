@@ -29,8 +29,8 @@ const form = ref<VehicleForm>({
   images: [],
 })
 
-function displayUrl(path: string) {
-  return path ? imageUrl(path) : ''
+function displayUrl(img: { image_path: string; image_url?: string }) {
+  return img.image_path ? imageUrl(img.image_path, img.image_url) : ''
 }
 
 function removeImage(index: number) {
@@ -68,9 +68,10 @@ async function onFilesPicked(event: Event) {
     const file = imageFiles[i]
     if (!file) continue
     try {
-      const { path } = await api.admin.uploadImage(file)
+      const { path, display_url: previewUrl } = await api.admin.uploadImage(file)
       form.value.images.push({
         image_path: path,
+        image_url: previewUrl,
         position: form.value.images.length + 1,
         is_primary: form.value.images.length === 0,
       })
@@ -137,7 +138,12 @@ async function loadVehicle() {
       images: v.images?.length
         ? [...v.images]
             .sort((a, b) => a.position - b.position)
-            .map((i) => ({ image_path: i.image_path, position: i.position, is_primary: i.is_primary }))
+            .map((i) => ({
+              image_path: i.image_path,
+              image_url: i.image_url,
+              position: i.position,
+              is_primary: i.is_primary,
+            }))
         : [],
     }
   } catch (e) {
@@ -252,7 +258,7 @@ onMounted(() => loadVehicle())
             @dragend="onDragEnd"
           >
             <div class="image-preview">
-              <img :src="displayUrl(img.image_path)" :alt="'Preview ' + (idx + 1)" />
+              <img :src="displayUrl(img)" :alt="'Preview ' + (idx + 1)" />
             </div>
             <div class="image-actions">
               <span class="drag-handle" title="Drag to reorder">⋮⋮</span>

@@ -2,6 +2,8 @@ export interface VehicleImage {
   id: number
   vehicle_id: string
   image_path: string
+  /** Presigned URL from the API when images are on a private S3 disk */
+  image_url?: string
   position: number
   is_primary: boolean
 }

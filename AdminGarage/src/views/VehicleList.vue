@@ -49,7 +49,7 @@ const STATUS_OPTIONS = [
 function primaryImage(v: Vehicle) {
   const img = v.images?.find((i) => i.is_primary) || v.images?.[0]
   const path = img?.image_path || ''
-  return path ? imageUrl(path) : ''
+  return path ? imageUrl(path, img?.image_url) : ''
 }
 
 function sortedImages(v: Vehicle) {
@@ -57,8 +57,8 @@ function sortedImages(v: Vehicle) {
   return [...imgs].sort((a, b) => a.position - b.position)
 }
 
-function imageSrc(path: string) {
-  return path ? imageUrl(path) : ''
+function imageSrc(path: string, resolvedUrl?: string | null) {
+  return path ? imageUrl(path, resolvedUrl) : ''
 }
 
 function carouselPrev() {
@@ -165,7 +165,13 @@ function vehicleToForm(v: Vehicle): VehicleForm {
     make: v.make,
     price: v.price ?? 0,
     details_and_financing: v.details_and_financing || '',
-    images: v.images?.map((i) => ({ image_path: i.image_path, position: i.position, is_primary: i.is_primary })) ?? [],
+    images:
+      v.images?.map((i) => ({
+        image_path: i.image_path,
+        image_url: i.image_url,
+        position: i.position,
+        is_primary: i.is_primary,
+      })) ?? [],
   }
 }
 
@@ -332,7 +338,7 @@ onMounted(() => {
                   </button>
                   <div class="carousel-main">
                     <img
-                      :src="imageSrc(sortedImages(selectedVehicle)[carouselIndex]?.image_path ?? '')"
+                      :src="imageSrc(sortedImages(selectedVehicle)[carouselIndex]?.image_path ?? '', sortedImages(selectedVehicle)[carouselIndex]?.image_url)"
                       :alt="`${selectedVehicle.title} - image ${carouselIndex + 1}`"
                     />
                   </div>

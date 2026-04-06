@@ -56,7 +56,7 @@ const orderedImages = computed(() => {
 const currentImageUrl = computed(() => {
   const img = orderedImages.value[carouselIndex.value]
   const path = img?.image_path || ''
-  return path ? imageUrl(path) : ''
+  return path ? imageUrl(path, img?.image_url) : ''
 })
 function setCarouselIndex(i: number) {
   if (!orderedImages.value.length) return
@@ -74,7 +74,7 @@ function prevImage() {
 
 function primaryImageForCard(v: Vehicle) {
   const img = v.images?.find((i) => i.is_primary) || v.images?.[0]
-  return img?.image_path ? imageUrl(img.image_path) : ''
+  return img?.image_path ? imageUrl(img.image_path, img.image_url) : ''
 }
 
 function formatPrice(n: number) {
@@ -288,7 +288,7 @@ watch([make, status], () => {
                     @click="setCarouselIndex(idx)"
                     :area-label="`View photo ${idx + 1}`"
                   >
-                    <img :src="imageUrl(img.image_path)" :alt="`${modalVehicle.title} ${img.position}`" class="modal-thumb" />
+                    <img :src="imageUrl(img.image_path, img.image_url)" :alt="`${modalVehicle.title} ${img.position}`" class="modal-thumb" />
                   </button>
                 </div>
               </div>

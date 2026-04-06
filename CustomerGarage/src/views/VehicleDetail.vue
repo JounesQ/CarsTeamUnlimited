@@ -19,7 +19,7 @@ const orderedImages = computed(() => {
 const currentImageUrl = computed(() => {
   const img = orderedImages.value[carouselIndex.value]
   const path = img?.image_path || ''
-  return path ? imageUrl(path) : ''
+  return path ? imageUrl(path, img?.image_url) : ''
 })
 
 function prevImage() {

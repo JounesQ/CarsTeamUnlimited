@@ -12,7 +12,8 @@ export function getStorageBase(): string {
   return base || 'http://127.0.0.1:8000'
 }
 
-export function imageUrl(path: string): string {
+export function imageUrl(path: string, resolvedUrl?: string | null): string {
+  if (resolvedUrl) return resolvedUrl
   if (!path) return ''
   if (path.startsWith('http')) return path
   return `${getStorageBase()}/storage/${path}`
@@ -149,7 +150,7 @@ export const api = {
           }
           throw new Error(err)
         }
-        return res.json() as Promise<{ path: string }>
+        return res.json() as Promise<{ path: string; display_url?: string }>
       })
     },
   },

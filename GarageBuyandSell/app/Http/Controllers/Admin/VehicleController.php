@@ -126,9 +126,8 @@ class VehicleController extends Controller
     }
 
     /**
-     * Upload an image file; returns storage path or full URL for use in vehicle images.
-     * Uses Supabase when configured, otherwise public disk.
-     * Falls back to public disk if Supabase fails (e.g. cURL SSL error 60 on Windows).
+     * Upload an image file; returns storage path for use in vehicle images (S3 key or public disk path).
+     * Uses S3 when bucket and credentials are configured, otherwise public disk.
      */
     public function uploadImage(Request $request)
     {
@@ -141,17 +140,21 @@ class VehicleController extends Controller
             'image.max' => 'Image must be under 10 MB. If uploads fail, increase upload_max_filesize in php.ini.',
         ]);
         $file = $request->file('image');
-        $useSupabase = config('filesystems.disks.supabase.key');
+        $useS3 = filled(config('filesystems.disks.s3.bucket'))
+            && filled(config('filesystems.disks.s3.key'))
+            && filled(config('filesystems.disks.s3.secret'));
 
-        if ($useSupabase) {
+        if ($useS3) {
             try {
-                $path = $file->store('vehicles', 'supabase');
-                $path = Storage::disk('supabase')->getAdapter()->getPublicUrl($path);
+                $path = $file->store('vehicles', 's3');
+                $displayUrl = Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(60));
 
-                return response()->json(['path' => $path]);
+                return response()->json([
+                    'path' => $path,
+                    'display_url' => $displayUrl,
+                ]);
             } catch (\Throwable $e) {
                 if (str_contains($e->getMessage(), 'SSL certificate') || str_contains($e->getMessage(), 'cURL error 60')) {
-                    // Fall back to local storage when SSL verification fails (common on Windows)
                     $path = $file->store('vehicles', 'public');
 
                     return response()->json(['path' => $path]);
@@ -210,9 +213,8 @@ class VehicleController extends Controller
             $position = (int) ($img['position'] ?? $i + 1);
             $position = max(1, min(50, $position));
             $path = $img['image_path'] ?? '';
-            // If frontend sends full URL (Supabase or external), store as-is
             if (str_starts_with($path, 'http')) {
-                // Keep full URL for Supabase/external storage
+                // Keep full URL for legacy/external storage
             } elseif (str_contains($path, '/storage/')) {
                 // Laravel public disk: extract path after /storage/
                 $path = substr($path, strpos($path, '/storage/') + strlen('/storage/'));

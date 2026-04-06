@@ -5,7 +5,8 @@ export function getStorageBase(): string {
   return base || 'http://127.0.0.1:8000'
 }
 
-export function imageUrl(path: string): string {
+export function imageUrl(path: string, resolvedUrl?: string | null): string {
+  if (resolvedUrl) return resolvedUrl
   if (!path) return ''
   if (path.startsWith('http')) return path
   const base = getStorageBase()

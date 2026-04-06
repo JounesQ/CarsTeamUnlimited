@@ -19,7 +19,7 @@ function formatPrice(n: number) {
 function primaryImage(v: Vehicle) {
   const img = v.images?.find((i) => i.is_primary) || v.images?.[0]
   const path = img?.image_path || ''
-  return path ? imageUrl(path) : ''
+  return path ? imageUrl(path, img?.image_url) : ''
 }
 
 async function load() {
