@@ -25,9 +25,9 @@ async function logout() {
   <div class="app-wrap">
     <header v-if="!isLoginPage()" class="site-header">
       <RouterLink to="/vehicles" class="logo">
-        <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="logo-img" />
+        <img src="/ctu-logo.svg" alt="Cars Team Unlimited" class="logo-img" />
         <div class="logo-text">
-          <span class="logo-brand">P7 GARAHE GALLERY</span>
+          <span class="logo-brand red-outline">CARS TEAM UNLIMITED</span>
           <span class="logo-subtitle">Admin Panel</span>
         </div>
       </RouterLink>
@@ -59,7 +59,7 @@ async function logout() {
       <RouterView />
     </main>
     <footer v-if="!isLoginPage()" class="site-footer">
-      <p>&copy; 2024 P7 Garahe Gallery Admin. All rights reserved.</p>
+      <p>&copy; 2024 Cars Team Unlimited Admin. All rights reserved.</p>
     </footer>
   </div>
 </template>
@@ -119,10 +119,6 @@ async function logout() {
 .logo-brand {
   font-weight: 900;
   font-size: 1.15rem;
-  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   letter-spacing: 1px;
 }
 
@@ -157,13 +153,13 @@ async function logout() {
   left: 50%;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+  background: linear-gradient(90deg, var(--red-primary), var(--red-light));
   transform: translateX(-50%);
   transition: width 0.3s ease;
 }
 
 .nav-link:hover {
-  color: var(--gold-primary);
+  color: var(--red-primary);
 }
 
 .nav-link:hover::after {
@@ -171,8 +167,8 @@ async function logout() {
 }
 
 .nav-link.router-link-active {
-  color: var(--gold-primary);
-  background: rgba(212, 175, 55, 0.1);
+  color: var(--red-primary);
+  background: rgba(216, 31, 38, 0.1);
 }
 
 .nav-link.router-link-active::after {
@@ -204,10 +200,10 @@ async function logout() {
 
 .theme-toggle {
   padding: 0.625rem;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(216, 31, 38, 0.1);
+  border: 1px solid rgba(216, 31, 38, 0.3);
   border-radius: 8px;
-  color: var(--gold-primary);
+  color: var(--red-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -217,8 +213,8 @@ async function logout() {
 }
 
 .theme-toggle:hover {
-  background: rgba(212, 175, 55, 0.2);
-  border-color: var(--gold-primary);
+  background: rgba(216, 31, 38, 0.2);
+  border-color: var(--red-primary);
   transform: scale(1.05);
 }
 

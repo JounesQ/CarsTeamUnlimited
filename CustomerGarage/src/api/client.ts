@@ -56,6 +56,7 @@ export const api = {
     status?: string
     min_price?: number
     max_price?: number
+    can_test_drive?: boolean
   }) {
     const sp = new URLSearchParams()
     if (params?.page) sp.set('page', String(params.page))
@@ -64,6 +65,7 @@ export const api = {
     if (params?.status) sp.set('status', params.status)
     if (params?.min_price != null) sp.set('min_price', String(params.min_price))
     if (params?.max_price != null) sp.set('max_price', String(params.max_price))
+    if (params?.can_test_drive != null) sp.set('can_test_drive', params.can_test_drive ? '1' : '0')
     const q = sp.toString()
     return request<import('@/types/vehicle').Paginated<import('@/types/vehicle').Vehicle>>('/vehicles' + (q ? `?${q}` : ''))
   },

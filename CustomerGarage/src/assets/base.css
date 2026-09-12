@@ -1,27 +1,31 @@
-/* P7 Garahe Gallery - Black & Gold Theme */
+/* Cars Team Unlimited - Red, Black & White Theme */
 :root {
-  /* Gold palette */
-  --gold-primary: #d4af37;
-  --gold-light: #f4d03f;
-  --gold-dark: #b8941e;
-  
+  /* Red palette */
+  --red-primary: #d81f26;
+  --red-light: #f0353d;
+  --red-dark: #a3141a;
+  --red-deep: #7a0f14;
+
   /* Black palette */
   --black-pure: #000000;
-  --black-soft: #0a0a0a;
-  --black-mute: #1a1a1a;
-  --black-lighter: #2a2a2a;
-  
+  --black-soft: #0b0b0c;
+  --black-mute: #141416;
+  --black-lighter: #1d1d20;
+
   /* White palette */
   --white-pure: #ffffff;
-  --white-soft: #f8f8f8;
-  --white-mute: #f2f2f2;
-  --white-darker: #e5e5e5;
-  
+  --white-soft: #f7f8fa;
+  --white-mute: #eef0f3;
+  --white-darker: #e0e3e8;
+
   /* Neutrals */
-  --gray-light: #e0e0e0;
-  --gray-mid: #b0b0b0;
-  --gray-dark: #888888;
-  --gray-darker: #333333;
+  --gray-light: #e6e8eb;
+  --gray-mid: #a8aeb6;
+  --gray-dark: #6f757d;
+  --gray-darker: #23262b;
+
+  /* Shirt accent for phone numbers */
+  --yellow-accent: #ffd400;
 }
 
 /* Dark Theme (Default) */
@@ -31,13 +35,38 @@
   --color-background: var(--black-pure);
   --color-background-soft: var(--black-soft);
   --color-background-mute: var(--black-mute);
-  --color-border: rgba(212, 175, 55, 0.2);
-  --color-border-hover: rgba(212, 175, 55, 0.4);
-  --color-heading: var(--gold-primary);
+  --color-surface: var(--black-lighter);
+  --color-border: rgba(216, 31, 38, 0.22);
+  --color-border-hover: rgba(216, 31, 38, 0.5);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-heading: var(--white-pure);
   --color-text: var(--gray-light);
   --color-text-muted: var(--gray-mid);
-  --color-accent: var(--gold-primary);
-  --color-accent-hover: var(--gold-light);
+  --color-accent: var(--red-primary);
+  --color-accent-hover: var(--red-light);
+  --color-accent-contrast: var(--white-pure);
+  --color-accent-soft: rgba(216, 31, 38, 0.12);
+  --color-glow: rgba(216, 31, 38, 0.35);
+  /* Red used as small text: lightened on dark, deepened on light, for contrast */
+  --color-accent-text: var(--red-light);
+
+  /* Composite surfaces, so panels and heroes can flip with the theme */
+  --gradient-hero:
+    radial-gradient(ellipse at 50% 0%, rgba(216, 31, 38, 0.18) 0%, transparent 60%),
+    linear-gradient(135deg, #000000 0%, #141416 100%);
+  --gradient-hero-alt:
+    radial-gradient(ellipse at 20% 0%, rgba(216, 31, 38, 0.2) 0%, transparent 60%),
+    linear-gradient(160deg, #000000 0%, #141416 100%);
+  --gradient-card: linear-gradient(135deg, #1d1d20 0%, #0f0f10 100%);
+  --gradient-card-accent: linear-gradient(135deg, rgba(216, 31, 38, 0.14), rgba(0, 0, 0, 0.9));
+  --color-header-bg: rgba(0, 0, 0, 0.96);
+  --color-footer-bg: #0b0b0c;
+  --color-card-border: rgba(255, 255, 255, 0.07);
+  --checker-square: rgba(255, 255, 255, 0.85);
+  --checker-base: #000000;
+  --checker-opacity: 0.45;
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 14px 34px rgba(0, 0, 0, 0.45);
 }
 
 /* Light Theme */
@@ -46,13 +75,38 @@
   --color-background: var(--white-pure);
   --color-background-soft: var(--white-soft);
   --color-background-mute: var(--white-mute);
-  --color-border: rgba(212, 175, 55, 0.3);
-  --color-border-hover: rgba(212, 175, 55, 0.5);
-  --color-heading: var(--gold-dark);
+  --color-surface: var(--white-pure);
+  --color-border: rgba(216, 31, 38, 0.28);
+  --color-border-hover: rgba(216, 31, 38, 0.55);
+  --color-border-subtle: rgba(0, 0, 0, 0.1);
+  --color-heading: var(--gray-darker);
   --color-text: var(--gray-darker);
   --color-text-muted: var(--gray-dark);
-  --color-accent: var(--gold-primary);
-  --color-accent-hover: var(--gold-dark);
+  --color-accent: var(--red-primary);
+  --color-accent-hover: var(--red-dark);
+  --color-accent-contrast: var(--white-pure);
+  --color-accent-soft: rgba(216, 31, 38, 0.08);
+  --color-glow: rgba(216, 31, 38, 0.22);
+  /* Red used as small text: lightened on dark, deepened on light, for contrast */
+  --color-accent-text: var(--red-dark);
+
+  /* Composite surfaces, so panels and heroes can flip with the theme */
+  --gradient-hero:
+    radial-gradient(ellipse at 50% 0%, rgba(216, 31, 38, 0.14) 0%, transparent 62%),
+    linear-gradient(135deg, #ffffff 0%, #e9ecf1 100%);
+  --gradient-hero-alt:
+    radial-gradient(ellipse at 20% 0%, rgba(216, 31, 38, 0.16) 0%, transparent 62%),
+    linear-gradient(160deg, #ffffff 0%, #e9ecf1 100%);
+  --gradient-card: linear-gradient(135deg, #ffffff 0%, #f2f4f8 100%);
+  --gradient-card-accent: linear-gradient(135deg, rgba(216, 31, 38, 0.1), rgba(255, 255, 255, 0.95));
+  --color-header-bg: rgba(255, 255, 255, 0.96);
+  --color-footer-bg: #eef0f3;
+  --color-card-border: rgba(16, 20, 28, 0.1);
+  --checker-square: rgba(17, 17, 20, 0.82);
+  --checker-base: #ffffff;
+  --checker-opacity: 0.5;
+  --shadow-lg: 0 10px 34px rgba(16, 20, 28, 0.14);
+  --shadow-md: 0 12px 28px rgba(16, 20, 28, 0.1);
 }
 
 *, *::before, *::after {
@@ -70,6 +124,17 @@ body {
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Checkered flag motif, reused by hero and section dividers */
+.ctu-checker {
+  background-image:
+    linear-gradient(45deg, var(--checker-square) 25%, transparent 25%, transparent 75%, var(--checker-square) 75%),
+    linear-gradient(45deg, var(--checker-square) 25%, transparent 25%, transparent 75%, var(--checker-square) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+  background-color: var(--checker-base);
 }
 
 /* Scrollbar styling */
@@ -79,14 +144,29 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--black-soft);
+  background: var(--color-background-soft);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--black-lighter);
+  background: var(--color-background-mute);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 0.3);
+  background: rgba(216, 31, 38, 0.45);
+}
+
+/* Red type with a white stroke, matching the CTU shirt */
+.red-outline {
+  color: var(--red-primary);
+  -webkit-text-fill-color: var(--red-primary);
+  -webkit-text-stroke: 0.04em var(--white-pure);
+  paint-order: stroke fill;
+}
+
+.red-outline-lg {
+  color: var(--red-primary);
+  -webkit-text-fill-color: var(--red-primary);
+  -webkit-text-stroke: 0.055em var(--white-pure);
+  paint-order: stroke fill;
 }

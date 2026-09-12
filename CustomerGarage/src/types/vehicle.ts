@@ -15,6 +15,7 @@ export interface Vehicle {
   status: string
   make: string
   price: number
+  can_test_drive: boolean
   details_and_financing: string | null
   created_at: string
   updated_at: string

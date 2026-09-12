@@ -1,6 +1,26 @@
 export const MAKES = [
-   'Mitsubishi', 'Toyota','Suzuki', 'Nissan', 'Hyundai',
-   'Honda', 
+  'Changan',
+  'Chery',
+  'Chevrolet',
+  'Ford',
+  'Foton',
+  'GAC',
+  'Geely',
+  'Honda',
+  'Hyundai',
+  'JAC',
+  'Jetour',
+  'JMC',
+  'JMMC',
+  'Kia',
+  'Mitsubishi',
+  'Morris Garage (MG)',
+  'Nissan',
+  'Peugeot',
+  'SsangYong',
+  'Subaru',
+  'Suzuki',
+  'Toyota',
 ] as const
 
 export const VEHICLE_TYPES = [

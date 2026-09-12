@@ -2,56 +2,53 @@
  * Theme composable for dark/light mode toggle
  */
 
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 export type Theme = 'light' | 'dark'
 
-const STORAGE_KEY = 'p7-theme-preference'
+const STORAGE_KEY = 'ctu-theme-preference'
+
+const readStoredTheme = (): Theme => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored === 'light' || stored === 'dark') {
+      return stored
+    }
+  } catch {
+    // Storage can throw in private browsing; fall through to the brand default.
+  }
+  return 'dark'
+}
+
+const applyTheme = (next: Theme) => {
+  const root = document.documentElement
+  root.setAttribute('data-theme', next)
+  root.classList.remove('light', 'dark')
+  root.classList.add(next)
+}
+
+// Kept at module scope so every caller shares one source of truth, and applied
+// on import so the right palette is on <html> before the first paint.
+const theme = ref<Theme>(readStoredTheme())
+applyTheme(theme.value)
+
+watch(theme, (next) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, next)
+  } catch {
+    // The preference just won't persist if storage is unavailable.
+  }
+  applyTheme(next)
+})
 
 export function useTheme() {
-  const theme = ref<Theme>('dark')
-
-  // Initialize theme from localStorage or system preference
-  const initTheme = () => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null
-    
-    if (stored) {
-      theme.value = stored
-    } else {
-      // Default to dark theme for P7 Garahe Gallery
-      theme.value = 'dark'
-    }
-    
-    applyTheme(theme.value)
-  }
-
-  // Apply theme to document
-  const applyTheme = (newTheme: Theme) => {
-    document.documentElement.setAttribute('data-theme', newTheme)
-    document.documentElement.classList.remove('light', 'dark')
-    document.documentElement.classList.add(newTheme)
-  }
-
-  // Toggle between light and dark
   const toggleTheme = () => {
     theme.value = theme.value === 'dark' ? 'light' : 'dark'
   }
 
-  // Set specific theme
-  const setTheme = (newTheme: Theme) => {
-    theme.value = newTheme
+  const setTheme = (next: Theme) => {
+    theme.value = next
   }
-
-  // Watch for theme changes and persist
-  watch(theme, (newTheme) => {
-    localStorage.setItem(STORAGE_KEY, newTheme)
-    applyTheme(newTheme)
-  })
-
-  // Initialize on mount
-  onMounted(() => {
-    initTheme()
-  })
 
   return {
     theme,

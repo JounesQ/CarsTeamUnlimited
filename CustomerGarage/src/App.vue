@@ -1,34 +1,72 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { computed, ref, provide } from 'vue'
+import { computed } from 'vue'
+import { useTheme } from '@/composables/useTheme'
+
+const { theme, toggleTheme } = useTheme()
 
 const route = useRoute()
 const isHomePage = computed(() => route.path === '/')
-const isVehiclesPage = computed(() => route.path === '/vehicles')
 const isAboutPage = computed(() => route.path === '/about')
 
 const showMobileFooter = computed(() => isHomePage.value || isAboutPage.value)
-
-const showMobileFilters = ref(false)
-provide('showMobileFilters', showMobileFilters)
-
-const toggleMobileFilters = () => {
-  showMobileFilters.value = !showMobileFilters.value
-}
 </script>
 
 <template>
   <div class="app-wrap">
     <header class="site-header" :class="{ 'header-transparent': isHomePage }">
       <RouterLink to="/" class="logo">
-        <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="logo-img" />
-        <span class="logo-text">P7 GARAHE GALLERY</span>
+        <img src="/ctu-logo.svg" alt="Cars Team Unlimited" class="logo-img" />
+        <span class="logo-text red-outline">CARS TEAM UNLIMITED</span>
       </RouterLink>
       <nav class="nav desktop-nav">
         <RouterLink to="/" class="nav-link">Home</RouterLink>
         <RouterLink to="/vehicles" class="nav-link">Vehicles</RouterLink>
         <RouterLink to="/about" class="nav-link">About</RouterLink>
+        <button
+          type="button"
+          class="theme-toggle"
+          :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+          :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+          @click="toggleTheme"
+        >
+          <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
       </nav>
+      <button
+        type="button"
+        class="theme-toggle mobile-theme-toggle"
+        :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        @click="toggleTheme"
+      >
+        <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
     </header>
     <main class="main">
       <RouterView />
@@ -44,21 +82,16 @@ const toggleMobileFilters = () => {
         <span>Home</span>
       </RouterLink>
       <RouterLink to="/vehicles" class="mobile-nav-item">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="1" y="3" width="15" height="13"></rect>
-          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-          <circle cx="5.5" cy="18.5" r="2.5"></circle>
-          <circle cx="18.5" cy="18.5" r="2.5"></circle>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 8l1.3-2.6A1 1 0 0 1 9.2 5h5.6a1 1 0 0 1 .9.4L17 8"></path>
+          <path d="M3 13l2-5h14l2 5"></path>
+          <path d="M3 13h18v4a1 1 0 0 1-1 1h-1"></path>
+          <circle cx="7.5" cy="17.5" r="1.5"></circle>
+          <circle cx="16.5" cy="17.5" r="1.5"></circle>
         </svg>
         <span>Vehicles</span>
       </RouterLink>
-      <button v-if="isVehiclesPage" @click="toggleMobileFilters" class="mobile-nav-item mobile-filter-btn" :class="{ active: showMobileFilters }">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-        </svg>
-        <span>Filters</span>
-      </button>
-      <RouterLink v-else to="/about" class="mobile-nav-item">
+      <RouterLink to="/about" class="mobile-nav-item">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -69,10 +102,10 @@ const toggleMobileFilters = () => {
     </nav>
     
     <footer class="site-footer desktop-footer">
-      <p>&copy; 2026 P7 Garahe Gallery. All rights reserved.</p>
+      <p>&copy; 2026 Cars Team Unlimited. All rights reserved.</p>
     </footer>
     <footer v-if="showMobileFooter" class="site-footer mobile-footer">
-      <p>&copy; 2026 P7 Garahe Gallery. All rights reserved.</p>
+      <p>&copy; 2026 Cars Team Unlimited. All rights reserved.</p>
     </footer>
   </div>
 </template>
@@ -82,7 +115,8 @@ const toggleMobileFilters = () => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #000;
+  background: var(--color-background);
+  transition: background-color 0.3s ease;
 }
 
 /* Header */
@@ -93,9 +127,10 @@ const toggleMobileFilters = () => {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 3rem;
-  background: rgba(0, 0, 0, 1.5);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-  transition: all 0.3s ease;
+  background: var(--color-header-bg);
+  border-bottom: 1px solid rgba(216, 31, 38, 0.2);
+  backdrop-filter: blur(10px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .logo {
@@ -120,10 +155,6 @@ const toggleMobileFilters = () => {
 .logo-text {
   font-weight: 900;
   font-size: 1.25rem;
-  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   letter-spacing: 1px;
 }
 
@@ -136,7 +167,7 @@ const toggleMobileFilters = () => {
 .nav-link {
   padding: 0.625rem 1.25rem;
   text-decoration: none;
-  color: #e0e0e0;
+  color: var(--color-text);
   border-radius: 8px;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -150,13 +181,13 @@ const toggleMobileFilters = () => {
   left: 50%;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #d4af37, #f4d03f);
+  background: linear-gradient(90deg, #d81f26, #f0353d);
   transform: translateX(-50%);
   transition: width 0.3s ease;
 }
 
 .nav-link:hover {
-  color: #d4af37;
+  color: #d81f26;
 }
 
 .nav-link:hover::after {
@@ -164,12 +195,38 @@ const toggleMobileFilters = () => {
 }
 
 .nav-link.router-link-active {
-  color: #d4af37;
-  background: rgba(212, 175, 55, 0.1);
+  color: #d81f26;
+  background: rgba(216, 31, 38, 0.1);
 }
 
 .nav-link.router-link-active::after {
   width: 60%;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: 0.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--red-primary);
+  border-color: var(--red-primary);
+  color: var(--white-pure);
+  transform: rotate(15deg);
+}
+
+.mobile-theme-toggle {
+  display: none;
 }
 @media (min-width: 769px) {
   .site-header {
@@ -195,12 +252,13 @@ const toggleMobileFilters = () => {
 
 /* Footer */
 .site-footer {
-  background: #0a0a0a;
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  background: var(--color-footer-bg);
+  border-top: 1px solid rgba(216, 31, 38, 0.2);
   padding: 1.5rem 2rem;
   text-align: center;
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 @media (min-width: 769px) {
   .site-footer {
@@ -220,7 +278,7 @@ const toggleMobileFilters = () => {
 /* Responsive */
 @media (max-width: 768px) {
   .app-wrap {
-    padding-bottom: 70px;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
   .site-header {
@@ -252,6 +310,22 @@ const toggleMobileFilters = () => {
     display: none;
   }
 
+  /* Logo stays optically centred, so the toggle is pinned rather than inline */
+  .mobile-theme-toggle {
+    display: flex;
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    margin-left: 0;
+  }
+
+  .mobile-theme-toggle:hover {
+    transform: translateY(-50%);
+  }
+
   /* Hide desktop footer on mobile */
   .desktop-footer {
     display: none;
@@ -268,18 +342,21 @@ const toggleMobileFilters = () => {
   }
 
   /* Mobile Bottom Navigation */
+  /* Floating pill bar, detached from the screen edge */
   .mobile-bottom-nav {
     display: flex;
+    gap: 0.15rem;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.98);
-    border-top: 1px solid rgba(212, 175, 55, 0.3);
-    padding: 0.5rem;
+    bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+    left: 1.25rem;
+    right: 1.25rem;
+    background: var(--color-header-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 999px;
+    padding: 0.2rem;
     z-index: 1000;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24);
   }
 
   .mobile-nav-item {
@@ -288,36 +365,33 @@ const toggleMobileFilters = () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
-    padding: 0.5rem;
+    gap: 0.1rem;
+    padding: 0.28rem 0.15rem;
     text-decoration: none;
-    color: #b0b0b0;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-size: 0.75rem;
-    font-weight: 500;
+    color: var(--color-text-muted);
+    border-radius: 999px;
+    transition: color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
     background: transparent;
     border: none;
     cursor: pointer;
   }
 
   .mobile-nav-item svg {
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
   }
 
   .mobile-nav-item:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
   }
 
-  .mobile-nav-item.router-link-active,
-  .mobile-nav-item.active {
-    color: var(--gold-primary);
-    background: rgba(212, 175, 55, 0.1);
-  }
-
-  .mobile-nav-item:not(.router-link-active):not(.active):active {
-    background: rgba(212, 175, 55, 0.05);
+  .mobile-nav-item.router-link-active {
+    color: var(--white-pure);
+    background: linear-gradient(135deg, #d81f26 0%, #f0353d 100%);
+    box-shadow: 0 4px 14px rgba(216, 31, 38, 0.45);
   }
 }
 </style>

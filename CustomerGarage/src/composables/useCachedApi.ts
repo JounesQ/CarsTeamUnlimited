@@ -25,6 +25,7 @@ interface CachedVehiclesOptions {
     vehicle_type?: string
     category?: string
     fuel_type?: string
+    can_test_drive?: boolean
   }
   onError?: (error: Error) => void
 }

@@ -73,6 +73,7 @@ function prepareBody(form: import('@/types/vehicle').VehicleForm) {
     status: form.status,
     make: form.make,
     price: form.price,
+    can_test_drive: form.can_test_drive,
     details_and_financing: form.details_and_financing?.trim() || null,
     images,
   }
@@ -97,12 +98,13 @@ export const api = {
     getStats() {
       return request<VehicleStats>('/admin/vehicles/stats')
     },
-    getVehicles(params?: { page?: number; per_page?: number; status?: string; make?: string }) {
+    getVehicles(params?: { page?: number; per_page?: number; status?: string; make?: string; can_test_drive?: boolean }) {
       const sp = new URLSearchParams()
       if (params?.page) sp.set('page', String(params.page))
       if (params?.per_page) sp.set('per_page', String(params.per_page))
       if (params?.status) sp.set('status', params.status)
       if (params?.make) sp.set('make', params.make)
+      if (params?.can_test_drive != null) sp.set('can_test_drive', params.can_test_drive ? '1' : '0')
       const q = sp.toString()
       return request<import('@/types/vehicle').Paginated<import('@/types/vehicle').Vehicle>>('/admin/vehicles' + (q ? `?${q}` : ''))
     },

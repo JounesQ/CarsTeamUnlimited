@@ -25,6 +25,12 @@ class VehicleController extends Controller
         if ($request->filled('make')) {
             $query->where('make', 'like', '%' . $request->make . '%');
         }
+        if ($request->has('can_test_drive') && $request->input('can_test_drive') !== '') {
+            $query->where(
+                'can_test_drive',
+                filter_var($request->input('can_test_drive'), FILTER_VALIDATE_BOOLEAN)
+            );
+        }
 
         $perPage = max(1, min(100, (int) $request->get('per_page', 15)));
         return $query->paginate($perPage);
@@ -191,6 +197,7 @@ class VehicleController extends Controller
             'status' => 'nullable|string|in:available,sold,reserved,coming',
             'make' => 'required|string|max:50',
             'price' => 'required|numeric|min:0',
+            'can_test_drive' => 'sometimes|boolean',
             'details_and_financing' => 'nullable|string|max:65535',
             'images' => 'nullable|array',
             'images.*.image_path' => 'required_with:images|string|max:255',
@@ -202,6 +209,9 @@ class VehicleController extends Controller
     private function fillVehicle(Vehicle $vehicle, array $data): void
     {
         $vehicle->price = (int) ($data['price'] ?? 0);
+        $vehicle->can_test_drive = array_key_exists('can_test_drive', $data)
+            ? (bool) $data['can_test_drive']
+            : true;
         $vehicle->details_and_financing = $data['details_and_financing'] ?? null;
     }
 

@@ -45,9 +45,9 @@ async function submit() {
 <template>
   <div class="login-card">
       <div class="login-header">
-        <img src="/p7-logo.png?v=3" alt="P7 Garahe Gallery" class="login-logo" />
+        <img src="/ctu-logo.svg" alt="Cars Team Unlimited" class="login-logo" />
         <h1>Admin Login</h1>
-        <p class="login-subtitle">P7 GARAHE GALLERY</p>
+        <p class="login-subtitle red-outline">CARS TEAM UNLIMITED</p>
       </div>
       <form @submit.prevent="submit" class="login-form">
         <p v-if="error" class="login-error">{{ error }}</p>
@@ -88,7 +88,7 @@ async function submit() {
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 20px 60px rgba(216, 31, 38, 0.15);
 }
 
 .login-header {
@@ -112,7 +112,7 @@ async function submit() {
 
 .login-subtitle {
   font-size: 0.85rem;
-  color: var(--color-text-muted);
+  font-weight: 800;
   letter-spacing: 2px;
   margin: 0;
 }
@@ -157,7 +157,7 @@ async function submit() {
 
 .field input:focus {
   outline: none;
-  border-color: var(--gold-primary);
+  border-color: var(--red-primary);
 }
 
 .field input::placeholder {
@@ -171,8 +171,8 @@ async function submit() {
 
 .btn-login {
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
-  color: #000;
+  background: linear-gradient(135deg, var(--red-primary), var(--red-light));
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -184,7 +184,7 @@ async function submit() {
 
 .btn-login:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 6px 20px rgba(216, 31, 38, 0.4);
 }
 
 .btn-login:disabled {

@@ -29,6 +29,12 @@ class VehicleController extends Controller
         if ($request->filled('max_price')) {
             $query->where('price', '<=', $request->max_price);
         }
+        if ($request->has('can_test_drive') && $request->input('can_test_drive') !== '') {
+            $query->where(
+                'can_test_drive',
+                filter_var($request->input('can_test_drive'), FILTER_VALIDATE_BOOLEAN)
+            );
+        }
 
         $perPage = max(1, min(500, (int) $request->get('per_page', 500)));
         return $query->paginate($perPage);

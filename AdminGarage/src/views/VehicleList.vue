@@ -12,6 +12,7 @@ const loading = ref(true)
 const pagination = ref({ current_page: 1, last_page: 1, per_page: 15, total: 0 })
 const statusFilter = ref((route.query.status as string) || '')
 const makeFilter = ref((route.query.make as string) || '')
+const testDriveFilter = ref((route.query.test_drive as string) || '')
 
 // Modal state
 const modalOpen = ref(false)
@@ -83,20 +84,28 @@ function formatTerm(key: string) {
   return n ? `${n} years` : key.replace(/_/g, ' ')
 }
 
+function toggleTestDriveFilter() {
+  testDriveFilter.value = testDriveFilter.value === '1' ? '0' : '1'
+  load(1)
+}
+
 function syncUrl(page: number) {
   const q: Record<string, string> = {}
   if (page > 1) q.page = String(page)
   if (statusFilter.value) q.status = statusFilter.value
   if (makeFilter.value) q.make = makeFilter.value
+  if (testDriveFilter.value) q.test_drive = testDriveFilter.value
   router.replace({ path: route.path, query: q })
 }
 
 async function load(page = 1) {
   loading.value = true
   try {
-    const params: Record<string, string | number> = { page, per_page: 10 }
+    const params: Record<string, string | number | boolean> = { page, per_page: 10 }
     if (statusFilter.value) params.status = statusFilter.value
     if (makeFilter.value) params.make = makeFilter.value
+    if (testDriveFilter.value === '1') params.can_test_drive = true
+    if (testDriveFilter.value === '0') params.can_test_drive = false
     const res = await api.admin.getVehicles(params) as Paginated<Vehicle>
     vehicles.value = Array.isArray(res?.data) ? res.data : []
     pagination.value = { current_page: res.current_page, last_page: res.last_page, per_page: res.per_page, total: res.total }
@@ -164,6 +173,7 @@ function vehicleToForm(v: Vehicle): VehicleForm {
     status: v.status,
     make: v.make,
     price: v.price ?? 0,
+    can_test_drive: v.can_test_drive !== false,
     details_and_financing: v.details_and_financing || '',
     images:
       v.images?.map((i) => ({
@@ -273,6 +283,22 @@ onMounted(() => {
         <option value="">All makes</option>
         <option v-for="make in MAKES" :key="make" :value="make">{{ make }}</option>
       </select>
+      <div class="td-filter filter-inp-end">
+        <span class="td-filter-label">Can test drive</span>
+        <span class="td-side" :class="{ active: testDriveFilter === '0' }">No</span>
+        <button
+          type="button"
+          class="td-switch"
+          :class="{ on: testDriveFilter === '1' }"
+          role="switch"
+          :aria-checked="testDriveFilter === '1'"
+          aria-label="Can test drive"
+          @click="toggleTestDriveFilter"
+        >
+          <span class="td-knob"></span>
+        </button>
+        <span class="td-side" :class="{ active: testDriveFilter === '1' }">Yes</span>
+      </div>
       <button type="button" class="btn" @click="load(1)">Filter</button>
     </div>
     <div v-if="loading" class="loading">Loading…</div>
@@ -283,6 +309,7 @@ onMounted(() => {
             <th>Image</th>
             <th>Title</th>
             <th>Status</th>
+            <th>Test drive</th>
             <th>Price</th>
             <th>Views</th>
           </tr>
@@ -297,6 +324,11 @@ onMounted(() => {
             </td>
             <td>{{ v.title }} </td>
             <td><span class="badge" :class="v.status">{{ v.status }}</span></td>
+            <td>
+              <span class="badge" :class="v.can_test_drive === false ? 'coming' : 'available'">
+                {{ v.can_test_drive === false ? 'No' : 'Yes' }}
+              </span>
+            </td>
             <td>{{ formatPrice(v.price) }}</td>
             <td>{{ v.views_count ?? 0 }}</td>
           </tr>
@@ -394,6 +426,10 @@ onMounted(() => {
                   <span class="detail-value price">{{ formatPrice(selectedVehicle.price) }}</span>
                 </div>
                 <div class="detail-row">
+                  <span class="detail-label">Can test drive:</span>
+                  <span class="detail-value">{{ selectedVehicle.can_test_drive === false ? 'No' : 'Yes' }}</span>
+                </div>
+                <div class="detail-row">
                   <span class="detail-label">Views:</span>
                   <span class="detail-value">{{ selectedVehicle.views_count ?? 0 }}</span>
                 </div>
@@ -487,17 +523,65 @@ onMounted(() => {
 }
 .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .admin-header h1 { font-size: 2rem; margin: 0; color: var(--color-heading); font-weight: 700; }
-.filters { display: flex; gap: 0.75rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--color-background-soft); border: 1px solid var(--color-border); border-radius: 12px; flex-wrap: wrap; }
+.filters { display: flex; gap: 0.75rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--color-background-soft); border: 1px solid var(--color-border); border-radius: 12px; flex-wrap: wrap; align-items: center; }
+.filter-inp-end { margin-left: auto; width: auto; }
+.td-filter { display: flex; align-items: center; gap: 0.5rem; }
+.td-filter-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  margin-right: 0.15rem;
+}
+.td-side {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.td-side.active { color: var(--color-heading); }
+.td-switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-background-mute);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+.td-switch.on {
+  background: linear-gradient(135deg, var(--red-primary), var(--red-light));
+}
+.td-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--white-pure);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+  transition: left 0.2s ease;
+}
+.td-switch.on .td-knob {
+  left: 22px;
+}
 .filter-inp { padding: 0.625rem 0.875rem; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background); color: var(--color-text); width: 140px; transition: border-color 0.3s ease; }
-.filter-inp:focus { outline: none; border-color: var(--gold-primary); }
+.filter-inp:focus { outline: none; border-color: var(--red-primary); }
 .btn { padding: 0.625rem 1.25rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background-mute); color: var(--color-text); cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
-.btn:hover { border-color: var(--gold-primary); color: var(--gold-primary); }
+.btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary { background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color: #000; border-color: transparent; font-weight: 600; }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4); color: #000; }
+.btn-primary { background: linear-gradient(135deg, var(--red-primary), var(--red-light)); color: #fff; border-color: transparent; font-weight: 600; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(216, 31, 38, 0.4); color: #000; }
 .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.875rem; }
-.btn-danger { background: #dc3545; color: white; border-color: transparent; }
-.btn-danger:hover { background: #c82333; color: white; }
+.btn-danger { background: var(--red-dark); color: #fff; border-color: transparent; }
+.btn-danger:hover { background: var(--red-deep); color: #fff; }
 .loading { text-align: center; padding: 3rem; color: var(--color-text); font-size: 1.1rem; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-background-soft); }
 .admin-table { width: 100%; border-collapse: collapse; }
@@ -505,15 +589,16 @@ onMounted(() => {
 .admin-table th { background: var(--color-background-mute); font-weight: 700; color: var(--color-heading); }
 .admin-table tbody tr { transition: background-color 0.2s ease; }
 .admin-table tbody tr.clickable-row { cursor: pointer; }
-.admin-table tbody tr.clickable-row:hover { background: rgba(212, 175, 55, 0.1); }
+.admin-table tbody tr.clickable-row:hover { background: rgba(216, 31, 38, 0.1); }
 .cell-img { width: 70px; height: 50px; }
 .cell-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid var(--color-border); }
 .badge { padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.badge.available { background: rgba(72, 187, 120, 0.2); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.4); }
-.badge.sold { background: rgba(245, 101, 101, 0.2); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.4); }
-.badge.draft { background: rgba(212, 175, 55, 0.2); color: var(--gold-primary); border: 1px solid rgba(212, 175, 55, 0.4); }
-.badge.reserved { background: rgba(66, 153, 225, 0.2); color: #4299e1; border: 1px solid rgba(66, 153, 225, 0.4); }
-.badge.coming { background: rgba(159, 122, 234, 0.2); color: #9f7aea; border: 1px solid rgba(159, 122, 234, 0.4); }
+/* Statuses are ranked by emphasis rather than hue, to stay inside red/black/white */
+.badge.available { background: linear-gradient(135deg, var(--red-primary), var(--red-light)); color: #fff; border: 1px solid transparent; }
+.badge.reserved { background: var(--color-accent-soft); color: var(--color-accent-text); border: 1px solid var(--color-border-hover); }
+.badge.coming { background: transparent; color: var(--color-text-muted); border: 1px dashed var(--color-border); }
+.badge.sold { background: var(--color-background-mute); color: var(--color-text-muted); border: 1px solid var(--color-card-border); }
+.badge.draft { background: var(--color-background-mute); color: var(--color-text-muted); border: 1px solid var(--color-card-border); }
 .pagination { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-top: 2rem; padding: 1.5rem 0; }
 .page-num { font-size: 1rem; color: var(--color-text); font-weight: 500; }
 
@@ -539,7 +624,7 @@ onMounted(() => {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 20px 60px rgba(216, 31, 38, 0.2);
 }
 
 .modal-header {
@@ -571,8 +656,8 @@ onMounted(() => {
 }
 
 .modal-close:hover {
-  background: rgba(212, 175, 55, 0.1);
-  color: var(--gold-primary);
+  background: rgba(216, 31, 38, 0.1);
+  color: var(--red-primary);
 }
 
 .modal-body {
@@ -623,9 +708,9 @@ onMounted(() => {
 }
 
 .carousel-btn:hover {
-  background: var(--gold-primary);
-  color: #000;
-  border-color: var(--gold-primary);
+  background: var(--red-primary);
+  color: #fff;
+  border-color: var(--red-primary);
 }
 
 .carousel-prev { left: 0.5rem; }
@@ -698,7 +783,7 @@ onMounted(() => {
 }
 
 .detail-value.price {
-  color: var(--gold-primary);
+  color: var(--red-primary);
   font-weight: 700;
   font-size: 1.25rem;
 }
@@ -718,7 +803,7 @@ onMounted(() => {
 .modal-financing h3 {
   font-size: 1.1rem;
   margin: 0 0 1rem;
-  color: var(--gold-primary);
+  color: var(--red-primary);
   font-weight: 700;
 }
 
@@ -758,16 +843,16 @@ onMounted(() => {
 }
 
 .term-btn:hover {
-  border-color: var(--gold-primary);
-  background: rgba(212, 175, 55, 0.05);
+  border-color: var(--red-primary);
+  background: rgba(216, 31, 38, 0.05);
   transform: translateY(-2px);
 }
 
 .term-btn.active {
-  border-color: var(--gold-primary);
-  background: rgba(212, 175, 55, 0.15);
-  color: var(--gold-primary);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+  border-color: var(--red-primary);
+  background: rgba(216, 31, 38, 0.15);
+  color: var(--red-primary);
+  box-shadow: 0 4px 12px rgba(216, 31, 38, 0.2);
 }
 
 .monthly-amount {
@@ -776,9 +861,9 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05));
+  background: linear-gradient(135deg, rgba(216, 31, 38, 0.1), rgba(240, 53, 61, 0.05));
   border-radius: 10px;
-  border: 2px solid var(--gold-primary);
+  border: 2px solid var(--red-primary);
 }
 
 .amount-label {
@@ -792,7 +877,7 @@ onMounted(() => {
 .amount-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--gold-primary);
+  color: var(--red-primary);
 }
 
 .status-edit {
@@ -842,28 +927,28 @@ onMounted(() => {
 }
 
 .btn-edit {
-  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
-  color: #000;
+  background: linear-gradient(135deg, var(--red-primary), var(--red-light));
+  color: #fff;
   border-color: transparent;
 }
 
 .btn-edit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 6px 20px rgba(216, 31, 38, 0.4);
   color: #000;
 }
 
 .btn-delete {
-  background: #dc3545;
-  color: white;
+  background: var(--red-dark);
+  color: #fff;
   border-color: transparent;
 }
 
 .btn-delete:hover {
-  background: #c82333;
-  color: white;
+  background: var(--red-deep);
+  color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  box-shadow: 0 6px 20px rgba(163, 20, 26, 0.45);
 }
 
 .btn-action:disabled {
@@ -1005,7 +1090,7 @@ onMounted(() => {
   max-width: 450px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 20px 60px rgba(216, 31, 38, 0.3);
 }
 
 .confirm-icon {
@@ -1019,13 +1104,13 @@ onMounted(() => {
 }
 
 .confirm-icon.delete {
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
+  background: rgba(163, 20, 26, 0.12);
+  color: var(--red-dark);
 }
 
 .confirm-icon.status {
-  background: rgba(212, 175, 55, 0.1);
-  color: var(--gold-primary);
+  background: rgba(216, 31, 38, 0.1);
+  color: var(--red-primary);
 }
 
 .confirm-title {
@@ -1057,32 +1142,32 @@ onMounted(() => {
 }
 
 .btn-cancel:hover {
-  border-color: var(--gold-primary);
-  color: var(--gold-primary);
+  border-color: var(--red-primary);
+  color: var(--red-primary);
 }
 
 .btn-confirm {
   flex: 1;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
-  color: #000;
+  background: linear-gradient(135deg, var(--red-primary), var(--red-light));
+  color: #fff;
   border-color: transparent;
   font-weight: 600;
 }
 
 .btn-confirm.btn-danger {
-  background: #dc3545;
-  color: white;
+  background: var(--red-dark);
+  color: #fff;
 }
 
 .btn-confirm:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 6px 20px rgba(216, 31, 38, 0.4);
 }
 
 .btn-confirm.btn-danger:hover {
-  background: #c82333;
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  background: var(--red-deep);
+  box-shadow: 0 6px 20px rgba(163, 20, 26, 0.45);
 }
 
 .btn-confirm:disabled,
@@ -1109,16 +1194,18 @@ onMounted(() => {
   min-width: 300px;
 }
 
+/* Success stays neutral with a red accent bar; errors take the loud solid red */
 .toast.success {
-  border-color: #48bb78;
-  background: rgba(72, 187, 120, 0.1);
-  color: #48bb78;
+  border-color: var(--color-card-border);
+  border-left: 4px solid var(--red-primary);
+  background: var(--color-background-soft);
+  color: var(--color-heading);
 }
 
 .toast.error {
-  border-color: #dc3545;
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
+  border-color: transparent;
+  background: var(--red-dark);
+  color: #fff;
 }
 
 .toast svg {

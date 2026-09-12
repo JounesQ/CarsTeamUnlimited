@@ -59,6 +59,7 @@ onMounted(async () => {
       <div class="detail-header">
         <h1>{{ vehicle.title || vehicle.make }}</h1>
         <p class="price">{{ formatPrice(vehicle.price) }}</p>
+        <p class="td-note">{{ vehicle.can_test_drive === false ? 'Not available for test drive' : 'Available for test drive' }}</p>
       </div>
       <div class="gallery">
         <div class="main-img">
@@ -101,12 +102,13 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .vehicle-detail { max-width: none; margin: 0; padding: 0.5rem 0.25rem; }
 }
-.back { background: none; border: none; color: hsla(160, 100%, 37%, 1); cursor: pointer; margin-bottom: 1rem; font-size: 1rem; }
+.back { background: none; border: none; color: var(--color-accent-text); cursor: pointer; margin-bottom: 1rem; font-size: 1rem; }
 .loading, .error { text-align: center; padding: 2rem; }
-.error { color: #c00; }
+.error { color: var(--color-accent-text); }
 .detail-header { margin-bottom: 1.5rem; }
 .detail-header h1 { font-size: 1.5rem; margin: 0 0 0.25rem; color: var(--color-heading); }
-.price { font-size: 1.25rem; font-weight: 600; margin: 0; }
+.price { font-size: 1.25rem; font-weight: 600; margin: 0; color: var(--red-primary); }
+.td-note { margin: 0.5rem 0 0; font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); }
 .gallery { margin-bottom: 2rem; border-radius: 10px; overflow: hidden; border: 1px solid var(--color-border); position: relative; }
 .main-img { aspect-ratio: 16/10; background: var(--color-background-mute); position: relative; }
 .main-img img, .main-img .no-img { width: 100%; height: 100%; object-fit: contain; }

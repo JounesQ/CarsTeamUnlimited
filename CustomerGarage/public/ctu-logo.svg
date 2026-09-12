@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Cars Team Unlimited">
+  <defs>
+    <pattern id="ctuChecker" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="#ffffff"/>
+      <rect width="8" height="8" fill="#111114"/>
+      <rect x="8" y="8" width="8" height="8" fill="#111114"/>
+    </pattern>
+    <clipPath id="ctuInner">
+      <circle cx="100" cy="100" r="74"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="100" cy="100" r="96" fill="#d81f26"/>
+  <circle cx="100" cy="100" r="84" fill="#111114"/>
+
+  <g clip-path="url(#ctuInner)">
+    <rect x="26" y="26" width="148" height="34" fill="url(#ctuChecker)" opacity="0.9"/>
+    <rect x="26" y="140" width="148" height="34" fill="url(#ctuChecker)" opacity="0.9"/>
+  </g>
+
+  <circle cx="100" cy="100" r="74" fill="none" stroke="#d81f26" stroke-width="3"/>
+
+  <text x="100" y="115" text-anchor="middle"
+        font-family="Inter, 'Segoe UI', Arial, sans-serif"
+        font-size="52" font-weight="900" letter-spacing="2" fill="#ffffff">CTU</text>
+</svg>

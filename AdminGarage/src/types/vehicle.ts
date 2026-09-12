@@ -20,6 +20,7 @@ export interface Vehicle {
   transmission: string
   fuel_type: string | null
   price: number
+  can_test_drive: boolean
   is_negotiable: boolean
   down_payment: number | null
   dp_all_in: boolean
@@ -36,6 +37,7 @@ export interface VehicleForm {
   status: string
   make: string
   price: number
+  can_test_drive: boolean
   details_and_financing: string
   images: { image_path: string; image_url?: string; position: number; is_primary: boolean }[]
 }

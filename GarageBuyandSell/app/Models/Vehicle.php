@@ -19,8 +19,14 @@ class Vehicle extends Model
         'status',
         'make',
         'price',
+        'can_test_drive',
         'details_and_financing',
         'views_count',
+    ];
+
+    protected $casts = [
+        'can_test_drive' => 'boolean',
+        'price' => 'integer',
     ];
 
     public function images()

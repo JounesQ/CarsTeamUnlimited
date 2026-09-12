@@ -177,8 +177,8 @@ onMounted(load)
 }
 
 .btn:hover {
-  border-color: var(--gold-primary);
-  color: var(--gold-primary);
+  border-color: var(--red-primary);
+  color: var(--red-primary);
 }
 
 .btn:disabled {
@@ -187,15 +187,15 @@ onMounted(load)
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
-  color: #000;
+  background: linear-gradient(135deg, var(--red-primary), var(--red-light));
+  color: #fff;
   border-color: transparent;
   font-weight: 600;
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 12px rgba(216, 31, 38, 0.4);
   color: #000;
 }
 
@@ -212,10 +212,10 @@ onMounted(load)
 }
 
 .error {
-  color: #f56565;
+  color: var(--color-accent-text);
   padding: 1rem;
-  background: rgba(245, 101, 101, 0.1);
-  border: 1px solid rgba(245, 101, 101, 0.3);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-border-hover);
   border-radius: 8px;
 }
 
@@ -238,9 +238,9 @@ onMounted(load)
 }
 
 .stat-card:hover {
-  border-color: rgba(212, 175, 55, 0.4);
+  border-color: rgba(216, 31, 38, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 4px 16px rgba(216, 31, 38, 0.15);
 }
 
 .clickable-stat {
@@ -248,8 +248,8 @@ onMounted(load)
 }
 
 .clickable-stat.active {
-  border-color: var(--gold-primary);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
+  border-color: var(--red-primary);
+  box-shadow: 0 0 0 2px rgba(216, 31, 38, 0.3);
 }
 
 .stat-label {
@@ -266,8 +266,8 @@ onMounted(load)
   color: var(--color-heading);
 }
 
-.stat-total .stat-value { color: var(--gold-primary); }
-.stat-available .stat-value { color: #48bb78; }
+.stat-total .stat-value { color: var(--red-primary); }
+.stat-available .stat-value { color: var(--red-primary); }
 
 .bottom-section {
   margin-top: 1rem;
@@ -351,7 +351,7 @@ onMounted(load)
 .vehicle-card-price {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--gold-primary);
+  color: var(--red-primary);
 }
 
 .badge {
@@ -362,10 +362,11 @@ onMounted(load)
   text-transform: uppercase;
 }
 
-.badge.available { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
-.badge.sold { background: rgba(245, 101, 101, 0.2); color: #f56565; }
-.badge.reserved { background: rgba(66, 153, 225, 0.2); color: #4299e1; }
-.badge.coming { background: rgba(159, 122, 234, 0.2); color: #9f7aea; }
+/* Statuses are ranked by emphasis rather than hue, to stay inside red/black/white */
+.badge.available { background: linear-gradient(135deg, var(--red-primary), var(--red-light)); color: #fff; }
+.badge.reserved { background: var(--color-accent-soft); color: var(--color-accent-text); }
+.badge.coming { background: transparent; color: var(--color-text-muted); border: 1px dashed var(--color-border); }
+.badge.sold { background: var(--color-background-mute); color: var(--color-text-muted); }
 
 .empty-vehicles {
   text-align: center;
