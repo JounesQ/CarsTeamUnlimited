@@ -504,7 +504,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  margin: 0 -1rem 0.75rem;
+  margin: 0 -1rem 0;
   padding: 0.85rem 1rem;
   background: var(--color-header-bg);
   border: 0 solid var(--color-border);
@@ -766,8 +766,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   -webkit-text-fill-color: var(--red-primary);
   -webkit-text-stroke: 0.04em var(--white-pure);
   paint-order: stroke fill;
-  margin: 0 0 2rem;
-  padding: 1rem 0;
+  margin: 0 0 1.25rem;
+  padding: 0;
   background: var(--color-background);
   box-shadow: 0 2px 0 var(--color-background);
 }
@@ -1018,8 +1018,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   /* Filters stay inline on mobile; the chip rows scroll instead of opening a panel */
   .filters {
     gap: 0.6rem;
-    margin-bottom: 1.25rem;
-    padding: 0.85rem 0;
+    margin-bottom: 0;
+    padding: 0.65rem 0;
   }
 
   .filter-row {

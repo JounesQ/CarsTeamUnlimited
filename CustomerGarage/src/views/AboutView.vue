@@ -87,7 +87,7 @@ const branches = [
             </div>
             <div>
               <dt>Open</dt>
-              <dd>8:00 AM – 7:00 PM, Mon–Sun</dd>
+              <dd>8:00 AM – 6:00 PM, Mon–Sun</dd>
             </div>
             <div>
               <dt>Financing</dt>

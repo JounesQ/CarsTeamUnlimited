@@ -1049,12 +1049,16 @@ onMounted(async () => {
     max-width: 200px;
   }
 
+  .hero-eyebrow {
+    font-size: 0.55rem;
+  }
+
   .brand-name {
     letter-spacing: 0.03em;
   }
 
   .tagline {
-    font-size: 0.95rem;
+    font-size: 0.65rem;
   }
 
   .hero-badges {
