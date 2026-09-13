@@ -48,11 +48,26 @@ const STATUS_OPTIONS = [
 ]
 
 const hasActiveFilters = computed(() => Boolean(make.value || status.value || testDrive.value))
+const makePickerOpen = ref(false)
+const selectedMakeLabel = computed(() => make.value || 'All makes')
 
 function clearFilters() {
   make.value = ''
   status.value = ''
   testDrive.value = ''
+}
+
+function openMakePicker() {
+  makePickerOpen.value = true
+}
+
+function closeMakePicker() {
+  makePickerOpen.value = false
+}
+
+function pickMake(value: string) {
+  make.value = value
+  closeMakePicker()
 }
 
 const modalOpen = ref(false)
@@ -77,7 +92,7 @@ function syncFilterOffset() {
 }
 
 function onPageScroll() {
-  if (scrollTicking || modalOpen.value) return
+  if (scrollTicking || modalOpen.value || makePickerOpen.value) return
   scrollTicking = true
   window.requestAnimationFrame(() => {
     const y = window.scrollY
@@ -233,9 +248,16 @@ function applyFilters() {
   load()
 }
 
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && makePickerOpen.value) {
+    closeMakePicker()
+  }
+}
+
 onMounted(() => {
   load()
   window.addEventListener('popstate', onPopState)
+  window.addEventListener('keydown', onKeydown)
   lastScrollY = window.scrollY
   syncFilterOffset()
   filtersObserver = new ResizeObserver(syncHeaderOffset)
@@ -246,6 +268,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   window.removeEventListener('popstate', onPopState)
+  window.removeEventListener('keydown', onKeydown)
   window.removeEventListener('scroll', onPageScroll)
   filtersObserver?.disconnect()
   filtersObserver = null
@@ -287,34 +310,25 @@ watch([make, status, testDrive], () => {
 
       <div class="filter-row">
         <span class="filter-label">Make</span>
-        <div class="chip-scroll">
-          <button
-            type="button"
-            class="chip"
-            :class="{ active: make === '' }"
-            :aria-pressed="make === ''"
-            @click="make = ''"
-          >
-            All makes
-          </button>
-          <button
-            v-for="m in MAKES"
-            :key="m"
-            type="button"
-            class="chip"
-            :class="{ active: make === m }"
-            :aria-pressed="make === m"
-            @click="make = m"
-          >
-            <img
-              v-if="makeLogoSrc(m)"
-              :src="makeLogoSrc(m)"
-              alt=""
-              class="chip-logo"
-            />
-            {{ m }}
-          </button>
-        </div>
+        <button
+          type="button"
+          class="chip make-trigger"
+          :class="{ active: Boolean(make) }"
+          :aria-expanded="makePickerOpen"
+          aria-haspopup="dialog"
+          @click="openMakePicker"
+        >
+          <img
+            v-if="make && makeLogoSrc(make)"
+            :src="makeLogoSrc(make)"
+            alt=""
+            class="chip-logo"
+          />
+          <span>{{ selectedMakeLabel }}</span>
+          <svg class="make-trigger-caret" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
       </div>
 
       <div class="filter-foot">
@@ -484,6 +498,54 @@ watch([make, status, testDrive], () => {
         </div>
       </Transition>
     </Teleport>
+
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="makePickerOpen"
+          class="modal-overlay make-picker-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Choose a make"
+          @click.self="closeMakePicker"
+        >
+          <div class="make-picker" @click.stop>
+            <div class="make-picker-head">
+              <h2>Choose a make</h2>
+              <button type="button" class="modal-close-btn" aria-label="Close" @click="closeMakePicker">×</button>
+            </div>
+            <div class="make-picker-grid">
+              <button
+                type="button"
+                class="make-pick"
+                :class="{ active: make === '' }"
+                @click="pickMake('')"
+              >
+                <span class="make-pick-logo make-pick-logo-empty">All</span>
+                <span>All makes</span>
+              </button>
+              <button
+                v-for="m in MAKES"
+                :key="m"
+                type="button"
+                class="make-pick"
+                :class="{ active: make === m }"
+                @click="pickMake(m)"
+              >
+                <img
+                  v-if="makeLogoSrc(m)"
+                  :src="makeLogoSrc(m)"
+                  :alt="m"
+                  class="make-pick-logo"
+                />
+                <span v-else class="make-pick-logo make-pick-logo-empty">{{ m.slice(0, 1) }}</span>
+                <span>{{ m }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -597,6 +659,14 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   color: #fff;
   font-weight: 600;
   box-shadow: 0 3px 12px rgba(216, 31, 38, 0.35);
+}
+
+.make-trigger {
+  padding-right: 0.75rem;
+}
+
+.make-trigger-caret {
+  opacity: 0.7;
 }
 
 .filter-foot {
@@ -829,6 +899,98 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 .card-price { font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--red-primary); }
 .card-meta { font-size: 0.85rem; margin: 0; color: var(--color-text-muted); }
 
+.make-picker-overlay {
+  z-index: 1200;
+  align-items: flex-end;
+}
+
+.make-picker {
+  width: 100%;
+  max-width: 720px;
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 16px 16px 0 0;
+  padding: 1rem 1rem 1.25rem;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.make-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.make-picker-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-heading);
+}
+
+.make-picker-head .modal-close-btn {
+  position: static;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.25rem;
+}
+
+.make-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.65rem;
+}
+
+.make-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.make-pick:hover {
+  border-color: var(--red-primary);
+  color: var(--red-primary);
+}
+
+.make-pick.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #d81f26 0%, #f0353d 100%);
+  color: #fff;
+}
+
+.make-pick-logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+}
+
+.make-pick-logo-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-background-mute);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.make-pick.active .make-pick-logo-empty {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -993,6 +1155,15 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   .modal-specs dl {
     position: relative;
     z-index: 1;
+  }
+
+  .make-picker-overlay {
+    align-items: center;
+  }
+
+  .make-picker {
+    border-radius: 16px;
+    max-height: min(76vh, 620px);
   }
 }
 
