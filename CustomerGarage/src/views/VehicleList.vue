@@ -939,21 +939,21 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 
 .make-picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.55rem;
 }
 
 .make-pick {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.85rem 0.5rem;
+  gap: 0.4rem;
+  padding: 0.55rem 0.25rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
   background: var(--color-background);
   color: var(--color-text);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -971,8 +971,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
 }
 
 .make-pick-logo {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 3.1rem;
+  height: 3.1rem;
   object-fit: contain;
 }
 
@@ -982,7 +982,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   justify-content: center;
   border-radius: 50%;
   background: var(--color-background-mute);
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   font-weight: 800;
 }
 

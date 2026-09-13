@@ -84,11 +84,11 @@ onMounted(async () => {
       <div class="hero-content">
         <div class="hero-badge">
           <img
-            src="/CTUF%20logo.jpg"
+            src="/CTUHomeLogo.png"
             alt="Cars Team Unlimited — Ride Your Dreams. Buy, Sell, Financing, Trade-In."
             class="hero-badge-img"
-            width="1024"
-            height="1024"
+            width="1125"
+            height="803"
           />
         </div>
         <p class="hero-eyebrow">Reliable &middot; Financing &middot; Trade-In</p>
@@ -379,18 +379,19 @@ onMounted(async () => {
 
 .hero-badge-img {
   width: 100%;
-  max-width: 340px;
+  max-width: 480px;
   height: auto;
   object-fit: contain;
   background: transparent;
-  box-shadow: 0 0 60px rgba(216, 31, 38, 0.35);
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+  /* Follow the logo shape (rounded card), not the rectangular PNG box */
+  filter: drop-shadow(0 0 22px rgba(216, 31, 38, 0.45));
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s ease;
   animation: badgeFloat 6s ease-in-out 1s infinite;
 }
 
 .hero-badge-img:hover {
   transform: scale(1.04);
-  box-shadow: 0 0 80px rgba(216, 31, 38, 0.55);
+  filter: drop-shadow(0 0 32px rgba(216, 31, 38, 0.65));
 }
 
 @keyframes badgeFloat {
@@ -1046,7 +1047,7 @@ onMounted(async () => {
   }
 
   .hero-badge-img {
-    max-width: 200px;
+    max-width: 280px;
   }
 
   .hero-eyebrow {
@@ -1119,7 +1120,7 @@ onMounted(async () => {
 
 @media (max-width: 480px) {
   .hero-badge-img {
-    max-width: 160px;
+    max-width: 220px;
   }
 
   .brand-name {
