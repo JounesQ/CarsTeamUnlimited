@@ -1,9 +1,12 @@
+import { DEMO_TOKEN } from '@/stores/auth'
+import { demoAdmin, demoAuth, isDemoSession } from '@/api/demo'
+
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://127.0.0.1:8000/api'
 
 export function getAuthHeaders(): Record<string, string> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null
   const headers: Record<string, string> = { Accept: 'application/json' }
-  if (token) headers['Authorization'] = `Bearer ${token}`
+  if (token && token !== DEMO_TOKEN) headers['Authorization'] = `Bearer ${token}`
   return headers
 }
 
@@ -15,8 +18,20 @@ export function getStorageBase(): string {
 export function imageUrl(path: string, resolvedUrl?: string | null): string {
   if (resolvedUrl) return resolvedUrl
   if (!path) return ''
-  if (path.startsWith('http')) return path
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path
   return `${getStorageBase()}/storage/${path}`
+}
+
+function redirectToLogin() {
+  localStorage.removeItem('admin_token')
+  localStorage.removeItem('admin_user')
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || ''
+  const loginPath = (base && !base.includes('localhost') && !base.includes(':')) ? `${base}/login` : '/login'
+  const loginPathClean = loginPath.replace(/\/+/g, '/')
+  const path = window.location.pathname + window.location.search
+  const isSafePath = path.startsWith('/') && !path.includes('://') && !path.includes('localhost') && !path.includes(':')
+  const redirect = encodeURIComponent(isSafePath ? path : '/')
+  window.location.href = `${window.location.origin}${loginPathClean}?redirect=${redirect}`
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -32,15 +47,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   })
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem('admin_token')
-      localStorage.removeItem('admin_user')
-      const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || ''
-      const loginPath = (base && !base.includes('localhost') && !base.includes(':')) ? `${base}/login` : '/login'
-      const loginPathClean = loginPath.replace(/\/+/g, '/')
-      const path = window.location.pathname + window.location.search
-      const isSafePath = path.startsWith('/') && !path.includes('://') && !path.includes('localhost') && !path.includes(':')
-      const redirect = encodeURIComponent(isSafePath ? path : '/')
-      window.location.href = `${window.location.origin}${loginPathClean}?redirect=${redirect}`
+      if (isDemoSession()) throw new Error('Demo session cannot call the live API.')
+      redirectToLogin()
       throw new Error('Session expired. Please log in again.')
     }
     const text = await res.text()
@@ -96,9 +104,11 @@ export interface VehicleStats {
 export const api = {
   admin: {
     getStats() {
+      if (isDemoSession()) return demoAdmin.getStats()
       return request<VehicleStats>('/admin/vehicles/stats')
     },
     getVehicles(params?: { page?: number; per_page?: number; status?: string; make?: string; can_test_drive?: boolean }) {
+      if (isDemoSession()) return demoAdmin.getVehicles(params)
       const sp = new URLSearchParams()
       if (params?.page) sp.set('page', String(params.page))
       if (params?.per_page) sp.set('per_page', String(params.per_page))
@@ -109,35 +119,35 @@ export const api = {
       return request<import('@/types/vehicle').Paginated<import('@/types/vehicle').Vehicle>>('/admin/vehicles' + (q ? `?${q}` : ''))
     },
     getVehicle(id: string) {
+      if (isDemoSession()) return demoAdmin.getVehicle(id)
       return request<import('@/types/vehicle').Vehicle>(`/admin/vehicles/${id}`)
     },
     createVehicle(body: import('@/types/vehicle').VehicleForm) {
+      if (isDemoSession()) return demoAdmin.createVehicle(body)
       return request<import('@/types/vehicle').Vehicle>('/admin/vehicles', {
         method: 'POST',
         body: JSON.stringify(prepareBody(body)),
       })
     },
     updateVehicle(id: string, body: import('@/types/vehicle').VehicleForm) {
+      if (isDemoSession()) return demoAdmin.updateVehicle(id, body)
       return request<import('@/types/vehicle').Vehicle>(`/admin/vehicles/${id}`, {
         method: 'PUT',
         body: JSON.stringify(prepareBody(body)),
       })
     },
     deleteVehicle(id: string) {
+      if (isDemoSession()) return demoAdmin.deleteVehicle(id)
       return request<void>(`/admin/vehicles/${id}`, { method: 'DELETE' })
     },
     uploadImage(file: File) {
+      if (isDemoSession()) return demoAdmin.uploadImage(file)
       const url = `${API_BASE}/admin/vehicles/upload-image`
       const form = new FormData()
       form.append('image', file)
       return fetch(url, { method: 'POST', body: form, headers: getAuthHeaders() }).then(async (res) => {
         if (res.status === 401) {
-          localStorage.removeItem('admin_token')
-          localStorage.removeItem('admin_user')
-          const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || ''
-          const loginPath = (base && !base.includes('localhost') && !base.includes(':')) ? `${base}/login` : '/login'
-          const loginPathClean = loginPath.replace(/\/+/g, '/')
-          window.location.href = `${window.location.origin}${loginPathClean}`
+          redirectToLogin()
           throw new Error('Session expired. Please log in again.')
         }
         if (!res.ok) {
@@ -164,9 +174,11 @@ export const api = {
       })
     },
     logout() {
+      if (isDemoSession()) return demoAuth.logout()
       return request<{ message: string }>('/admin/logout', { method: 'POST' })
     },
     me() {
+      if (isDemoSession()) return demoAuth.me()
       return request<{ user: { id: string; name: string; username: string } }>('/admin/me')
     },
   },

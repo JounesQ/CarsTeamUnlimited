@@ -2,7 +2,7 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '@/api/client'
-import { setAuth } from '@/stores/auth'
+import { DEMO_ADMIN, DEMO_TOKEN, setAuth } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,8 +27,13 @@ async function submit() {
   }
   loading.value = true
   try {
-    const res = await api.auth.login(username.value.trim(), password.value)
-    setAuth(res.token, res.user)
+    const name = username.value.trim()
+    if (name === DEMO_ADMIN.username && password.value === DEMO_ADMIN.password) {
+      setAuth(DEMO_TOKEN, { id: 'demo', name: 'Demo Admin', username: DEMO_ADMIN.username })
+    } else {
+      const res = await api.auth.login(name, password.value)
+      setAuth(res.token, res.user)
+    }
     await nextTick()
     const rawRedirect = (route.query.redirect as string) || '/'
     const isSafePath = rawRedirect.startsWith('/') && !rawRedirect.includes('://') && !rawRedirect.includes('localhost') && !rawRedirect.includes(':')
@@ -76,6 +81,7 @@ async function submit() {
         <button type="submit" class="btn-login" :disabled="loading">
           {{ loading ? 'Signing in…' : 'Sign In' }}
         </button>
+        <p class="login-demo">Demo: {{ DEMO_ADMIN.username }} / {{ DEMO_ADMIN.password }}</p>
       </form>
   </div>
 </template>
@@ -191,5 +197,12 @@ async function submit() {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
+}
+
+.login-demo {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
 }
 </style>
