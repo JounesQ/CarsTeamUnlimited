@@ -58,19 +58,19 @@ const branches = [
         <div class="story-text">
           <h2>How we got here</h2>
           <p>
-            We started with a single lot and a simple frustration: buyers were being shown units
-            nobody had properly checked, at prices nobody would explain. So we built the opposite.
+            Cars Team Unlimited (CTU) started in 2020 during the pandemic with only 3–4 sedan units,
+            displayed along the sidewalk in West Avenue, Quezon City. We eventually rented a small
+            space in Congressional before deciding to move back to Cavite, where we started our first
+            showroom on a 149-square-meter lot.
           </p>
           <p>
-            Today the team runs four branches, but the process has not changed. We buy selectively,
-            we document everything, and we quote one price that stays negotiable once you have seen
-            the car in person. If a unit has a scratch, a replaced part, or a quirk in its history,
-            you will hear it from us before you ask.
+            From just 10 units, we joined bank repossessed-vehicle bidding and grew to 30 units. In
+            2023, we entered the financing business, and by God's grace, CTU experienced tremendous
+            growth and became a Top 1 Dealer.
           </p>
           <p>
-            Most of our customers are first-time buyers and small business owners. That shapes how we
-            work — patient walkthroughs, honest answers about running costs, and financing options
-            explained in plain terms instead of jargon.
+            Today, CTU continues to grow and currently has 140 units on hand, with bigger dreams and
+            greater goals ahead.
           </p>
         </div>
 

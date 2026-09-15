@@ -890,7 +890,7 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   border: 1px solid var(--color-card-border);
 }
 .status-badge { padding: 0.375rem 0.75rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 6px; white-space: nowrap; }
-.status-badge.available { background: linear-gradient(135deg, var(--red-primary), var(--red-light)); color: #fff; }
+.status-badge.available { background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; }
 /* Statuses are ranked by emphasis rather than hue, to stay inside red/black/white */
 .status-badge.reserved { background: var(--color-accent-soft); color: var(--color-accent-text); border: 1px solid var(--color-border-hover); }
 .status-badge.coming { background: var(--color-background-mute); color: var(--color-text-muted); border: 1px solid var(--color-card-border); }
