@@ -59,7 +59,7 @@ async function logout() {
       <RouterView />
     </main>
     <footer v-if="!isLoginPage()" class="site-footer">
-      <p>&copy; 2024 Cars Team Unlimited Admin. All rights reserved.</p>
+      <p>&copy; 2026 Cars Team Unlimited Admin. All rights reserved.</p>
     </footer>
   </div>
 </template>
