@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, imageUrl } from '@/api/client'
 import type { Vehicle, VehicleForm, Paginated } from '@/types/vehicle'
@@ -47,6 +47,63 @@ const STATUS_OPTIONS = [
   { value: 'coming', label: 'Coming' },
 ]
 
+const FILTER_STATUS_OPTIONS = [
+  { value: '', label: 'All statuses' },
+  { value: 'available', label: 'Available' },
+  { value: 'reserved', label: 'Reserved' },
+  { value: 'coming', label: 'Coming' },
+  { value: 'sold', label: 'Sold' },
+]
+
+const MAKE_LOGOS: Record<string, string> = {
+  Honda: '/BrandLogo/honda logo.png',
+  Mitsubishi: '/BrandLogo/mitsu logo.png',
+  Hyundai: '/BrandLogo/hyundai-logo.png',
+  Nissan: '/BrandLogo/nissan-logo.png',
+  Suzuki: '/BrandLogo/suzuki-logo.png',
+  Toyota: '/BrandLogo/toyota-logo.png',
+  Changan: '/BrandLogo/changan-logo.png',
+  Chery: '/BrandLogo/chery-logo.png',
+  Chevrolet: '/BrandLogo/chevrolet-logo.png',
+  Ford: '/BrandLogo/ford-logo.png',
+  Foton: '/BrandLogo/foton-logo.png',
+  GAC: '/BrandLogo/gac-logo.png',
+  Geely: '/BrandLogo/geely-logo.png',
+  JAC: '/BrandLogo/jac-logo.png',
+  Kia: '/BrandLogo/kia-logo.png',
+  Peugeot: '/BrandLogo/peugeot-logo.png',
+  SsangYong: '/BrandLogo/ssangyong-logo.png',
+  Subaru: '/BrandLogo/subaru-logo.png',
+}
+
+function makeLogoSrc(make: string) {
+  const path = MAKE_LOGOS[make]
+  return path ? encodeURI(path) : ''
+}
+
+const makePickerOpen = ref(false)
+const hasActiveFilters = computed(() => Boolean(statusFilter.value || makeFilter.value || testDriveFilter.value))
+const selectedMakeLabel = computed(() => makeFilter.value || 'All makes')
+
+function clearFilters() {
+  statusFilter.value = ''
+  makeFilter.value = ''
+  testDriveFilter.value = ''
+}
+
+function openMakePicker() {
+  makePickerOpen.value = true
+}
+
+function closeMakePicker() {
+  makePickerOpen.value = false
+}
+
+function pickMake(value: string) {
+  makeFilter.value = value
+  closeMakePicker()
+}
+
 function primaryImage(v: Vehicle) {
   const img = v.images?.find((i) => i.is_primary) || v.images?.[0]
   const path = img?.image_path || ''
@@ -82,11 +139,6 @@ function formatTerm(key: string) {
   const n = key.replace(/\D/g, '')
   if (key.includes('year') && !key.includes('years')) return n ? `${n} year` : key
   return n ? `${n} years` : key.replace(/_/g, ' ')
-}
-
-function toggleTestDriveFilter() {
-  testDriveFilter.value = testDriveFilter.value === '1' ? '0' : '1'
-  load(1)
 }
 
 function syncUrl(page: number) {
@@ -259,9 +311,24 @@ function showErrorMessage(message: string) {
   }, 3000)
 }
 
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && makePickerOpen.value) {
+    closeMakePicker()
+  }
+}
+
+watch([statusFilter, makeFilter, testDriveFilter], () => {
+  load(1)
+})
+
 onMounted(() => {
   const page = Math.max(1, parseInt(route.query.page as string, 10) || 1)
   load(page)
+  window.addEventListener('keydown', onKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
 })
 </script>
 
@@ -272,36 +339,74 @@ onMounted(() => {
       <button type="button" class="btn btn-primary" @click="router.push('/vehicles/new')">Add vehicle</button>
     </div>
     <div class="filters">
-      <select v-model="statusFilter" class="filter-inp">
-        <option value="">All statuses</option>
-        <option value="available">Available</option>
-        <option value="sold">Sold</option>
-        <option value="reserved">Reserved</option>
-        <option value="coming">Coming</option>
-      </select>
-      <select v-model="makeFilter" class="filter-inp">
-        <option value="">All makes</option>
-        <option v-for="make in MAKES" :key="make" :value="make">{{ make }}</option>
-      </select>
-      <div class="td-filter filter-inp-end">
-        <span class="td-filter-label">Can test drive</span>
-        <span class="td-side" :class="{ active: testDriveFilter === '0' }">No</span>
+      <div class="filter-row">
+        <span class="filter-label">Status</span>
+        <div class="chip-scroll">
+          <button
+            v-for="opt in FILTER_STATUS_OPTIONS"
+            :key="opt.value"
+            type="button"
+            class="chip"
+            :class="{ active: statusFilter === opt.value, 'chip-available': opt.value === 'available' }"
+            :aria-pressed="statusFilter === opt.value"
+            @click="statusFilter = opt.value"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Make</span>
         <button
           type="button"
-          class="td-switch"
-          :class="{ on: testDriveFilter === '1' }"
-          role="switch"
-          :aria-checked="testDriveFilter === '1'"
-          aria-label="Can test drive"
-          @click="toggleTestDriveFilter"
+          class="chip make-trigger"
+          :class="{ active: Boolean(makeFilter) }"
+          :aria-expanded="makePickerOpen"
+          aria-haspopup="dialog"
+          @click="openMakePicker"
         >
-          <span class="td-knob"></span>
+          <img
+            v-if="makeFilter && makeLogoSrc(makeFilter)"
+            :src="makeLogoSrc(makeFilter)"
+            alt=""
+            class="chip-logo"
+          />
+          <span>{{ selectedMakeLabel }}</span>
+          <svg class="make-trigger-caret" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </button>
-        <span class="td-side" :class="{ active: testDriveFilter === '1' }">Yes</span>
       </div>
-      <button type="button" class="btn" @click="load(1)">Filter</button>
+
+      <div class="filter-foot">
+        <div class="filter-foot-left">
+          <span class="result-count">
+            {{ pagination.total }} {{ pagination.total === 1 ? 'vehicle' : 'vehicles' }}
+          </span>
+          <button v-if="hasActiveFilters" type="button" class="clear-btn" @click="clearFilters">
+            Clear filters
+          </button>
+        </div>
+        <div class="td-filter">
+          <span class="td-filter-label">Can test drive:</span>
+          <span class="td-side" :class="{ active: testDriveFilter === '0' }">No</span>
+          <button
+            type="button"
+            class="td-switch"
+            :class="{ on: testDriveFilter === '1' }"
+            role="switch"
+            :aria-checked="testDriveFilter === '1'"
+            aria-label="Can test drive"
+            @click="testDriveFilter = testDriveFilter === '1' ? '0' : '1'"
+          >
+            <span class="td-knob"></span>
+          </button>
+          <span class="td-side" :class="{ active: testDriveFilter === '1' }">Yes</span>
+        </div>
+      </div>
     </div>
-    <div v-if="loading" class="loading">Loading…</div>
+    <div v-if="loading && vehicles.length === 0" class="loading">Loading…</div>
     <div v-else class="table-wrap">
       <table class="admin-table">
         <thead>
@@ -325,7 +430,7 @@ onMounted(() => {
             <td>{{ v.title }} </td>
             <td><span class="badge" :class="v.status">{{ v.status }}</span></td>
             <td>
-              <span class="badge" :class="v.can_test_drive === false ? 'coming' : 'available'">
+              <span class="badge" :class="v.can_test_drive === false ? 'coming' : 'td-yes'">
                 {{ v.can_test_drive === false ? 'No' : 'Yes' }}
               </span>
             </td>
@@ -513,6 +618,54 @@ onMounted(() => {
         </div>
       </Transition>
     </Teleport>
+
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="makePickerOpen"
+          class="modal-overlay make-picker-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Choose a make"
+          @click.self="closeMakePicker"
+        >
+          <div class="make-picker" @click.stop>
+            <div class="make-picker-head">
+              <h2>Choose a make</h2>
+              <button type="button" class="modal-close-btn" aria-label="Close" @click="closeMakePicker">×</button>
+            </div>
+            <div class="make-picker-grid">
+              <button
+                type="button"
+                class="make-pick"
+                :class="{ active: makeFilter === '' }"
+                @click="pickMake('')"
+              >
+                <span class="make-pick-logo make-pick-logo-empty">All</span>
+                <span>All makes</span>
+              </button>
+              <button
+                v-for="m in MAKES"
+                :key="m"
+                type="button"
+                class="make-pick"
+                :class="{ active: makeFilter === m }"
+                @click="pickMake(m)"
+              >
+                <img
+                  v-if="makeLogoSrc(m)"
+                  :src="makeLogoSrc(m)"
+                  :alt="m"
+                  class="make-pick-logo"
+                />
+                <span v-else class="make-pick-logo make-pick-logo-empty">{{ m.slice(0, 1) }}</span>
+                <span>{{ m }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -523,18 +676,154 @@ onMounted(() => {
 }
 .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .admin-header h1 { font-size: 2rem; margin: 0; color: var(--color-heading); font-weight: 700; }
-.filters { display: flex; gap: 0.75rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--color-background-soft); border: 1px solid var(--color-border); border-radius: 12px; flex-wrap: wrap; align-items: center; }
-.filter-inp-end { margin-left: auto; width: auto; }
-.td-filter { display: flex; align-items: center; gap: 0.5rem; }
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+  padding: 0.85rem 1rem;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.filter-label {
+  flex-shrink: 0;
+  width: 3.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.chip-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px;
+  margin: -2px;
+}
+
+.chip-scroll::-webkit-scrollbar { display: none; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.chip-logo {
+  width: 1.1rem;
+  height: 1.1rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.chip:hover {
+  border-color: var(--red-primary);
+  color: var(--red-primary);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--red-primary);
+  outline-offset: 2px;
+}
+
+.chip.active {
+  background: linear-gradient(135deg, #d81f26 0%, #f0353d 100%);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 12px rgba(216, 31, 38, 0.35);
+}
+
+.chip.active.chip-available {
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  box-shadow: 0 3px 12px rgba(234, 88, 12, 0.35);
+}
+
+.make-trigger {
+  padding-right: 0.75rem;
+}
+
+.make-trigger-caret {
+  opacity: 0.7;
+}
+
+.filter-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-left: 4.35rem;
+}
+
+.filter-foot-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.result-count {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+}
+
+.clear-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--red-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.clear-btn:hover { color: var(--red-light); }
+
+.td-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .td-filter-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--color-text-muted);
   white-space: nowrap;
-  margin-right: 0.15rem;
+  margin-right: 0.25rem;
 }
+
 .td-side {
   font-size: 0.72rem;
   font-weight: 700;
@@ -542,7 +831,9 @@ onMounted(() => {
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
+
 .td-side.active { color: var(--color-heading); }
+
 .td-switch {
   position: relative;
   width: 48px;
@@ -555,9 +846,11 @@ onMounted(() => {
   flex-shrink: 0;
   transition: background 0.2s ease;
 }
+
 .td-switch.on {
   background: linear-gradient(135deg, var(--red-primary), var(--red-light));
 }
+
 .td-knob {
   position: absolute;
   top: 2px;
@@ -569,11 +862,125 @@ onMounted(() => {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
   transition: left 0.2s ease;
 }
+
 .td-switch.on .td-knob {
   left: 22px;
 }
-.filter-inp { padding: 0.625rem 0.875rem; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background); color: var(--color-text); width: 140px; transition: border-color 0.3s ease; }
-.filter-inp:focus { outline: none; border-color: var(--red-primary); }
+
+.modal-overlay.make-picker-overlay {
+  z-index: 2100;
+  align-items: flex-end;
+}
+
+.make-picker {
+  width: 100%;
+  max-width: 720px;
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 16px 16px 0 0;
+  padding: 1rem 1rem 1.25rem;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.make-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.make-picker-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-heading);
+}
+
+.make-picker-head .modal-close-btn {
+  position: static;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.25rem;
+}
+
+.make-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.55rem;
+}
+
+.make-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.make-pick:hover {
+  border-color: var(--red-primary);
+  color: var(--red-primary);
+}
+
+.make-pick.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #d81f26 0%, #f0353d 100%);
+  color: #fff;
+}
+
+.make-pick-logo {
+  width: 3.1rem;
+  height: 3.1rem;
+  object-fit: contain;
+}
+
+.make-pick-logo-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-background-mute);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.make-pick.active .make-pick-logo-empty {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.modal-close-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-background-mute);
+  color: var(--color-text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  border-color: var(--red-primary);
+  color: var(--red-primary);
+  background: rgba(216, 31, 38, 0.1);
+}
 .btn { padding: 0.625rem 1.25rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background-mute); color: var(--color-text); cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
 .btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -594,7 +1001,8 @@ onMounted(() => {
 .cell-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid var(--color-border); }
 .badge { padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 /* Statuses are ranked by emphasis rather than hue, to stay inside red/black/white */
-.badge.available { background: linear-gradient(135deg, var(--red-primary), var(--red-light)); color: #fff; border: 1px solid transparent; }
+.badge.available { background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; border: 1px solid transparent; }
+.badge.td-yes { background: linear-gradient(135deg, var(--red-primary), var(--red-light)); color: #fff; border: 1px solid transparent; }
 .badge.reserved { background: var(--color-accent-soft); color: var(--color-accent-text); border: 1px solid var(--color-border-hover); }
 .badge.coming { background: transparent; color: var(--color-text-muted); border: 1px dashed var(--color-border); }
 .badge.sold { background: var(--color-background-mute); color: var(--color-text-muted); border: 1px solid var(--color-card-border); }
@@ -613,6 +1021,14 @@ onMounted(() => {
   justify-content: center;
   z-index: 2000;
   padding: 1rem;
+}
+
+@media (min-width: 769px) {
+  .modal-overlay.make-picker-overlay { align-items: center; }
+  .make-picker {
+    border-radius: 16px;
+    max-height: min(76vh, 620px);
+  }
 }
 
 .modal-box {
@@ -996,19 +1412,32 @@ onMounted(() => {
   }
 
   .filters {
-    padding: 0.5rem 0;
-    margin-bottom: 0.5rem;
-    gap: 0.5rem;
-    flex-direction: column;
+    padding: 0.65rem 0.75rem;
+    margin-bottom: 0.75rem;
+    gap: 0.6rem;
   }
 
-  .filter-inp {
-    width: 100%;
-    min-width: unset;
+  .filter-row {
+    gap: 0.6rem;
   }
 
-  .filters .btn {
-    width: 100%;
+  .filter-label {
+    width: 2.9rem;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+  }
+
+  .chip {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .filter-foot {
+    padding-left: 0;
+  }
+
+  .make-picker-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .table-wrap {

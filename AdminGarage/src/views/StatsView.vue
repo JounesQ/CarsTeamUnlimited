@@ -363,7 +363,7 @@ onMounted(load)
 }
 
 /* Statuses are ranked by emphasis rather than hue, to stay inside red/black/white */
-.badge.available { background: linear-gradient(135deg, var(--red-primary), var(--red-light)); color: #fff; }
+.badge.available { background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; }
 .badge.reserved { background: var(--color-accent-soft); color: var(--color-accent-text); }
 .badge.coming { background: transparent; color: var(--color-text-muted); border: 1px dashed var(--color-border); }
 .badge.sold { background: var(--color-background-mute); color: var(--color-text-muted); }
