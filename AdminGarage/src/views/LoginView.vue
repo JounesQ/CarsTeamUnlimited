@@ -2,7 +2,7 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '@/api/client'
-import { DEMO_ADMIN, DEMO_TOKEN, setAuth } from '@/stores/auth'
+import { setAuth } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +16,7 @@ onMounted(() => {
 })
 const username = ref('')
 const password = ref('')
+const showPassword = ref(false)
 const error = ref('')
 const loading = ref(false)
 
@@ -27,13 +28,8 @@ async function submit() {
   }
   loading.value = true
   try {
-    const name = username.value.trim()
-    if (name === DEMO_ADMIN.username && password.value === DEMO_ADMIN.password) {
-      setAuth(DEMO_TOKEN, { id: 'demo', name: 'Demo Admin', username: DEMO_ADMIN.username })
-    } else {
-      const res = await api.auth.login(name, password.value)
-      setAuth(res.token, res.user)
-    }
+    const res = await api.auth.login(username.value.trim(), password.value)
+    setAuth(res.token, res.user)
     await nextTick()
     const rawRedirect = (route.query.redirect as string) || '/'
     const isSafePath = rawRedirect.startsWith('/') && !rawRedirect.includes('://') && !rawRedirect.includes('localhost') && !rawRedirect.includes(':')
@@ -69,19 +65,37 @@ async function submit() {
         </div>
         <div class="field">
           <label for="password">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Enter password"
-            :disabled="loading"
-          />
+          <div class="password-wrap">
+            <input
+              id="password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="Enter password"
+              :disabled="loading"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              :aria-label="showPassword ? 'Hide password' : 'Show password'"
+              :disabled="loading"
+              @click="showPassword = !showPassword"
+            >
+              <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
         </div>
         <button type="submit" class="btn-login" :disabled="loading">
           {{ loading ? 'Signing in…' : 'Sign In' }}
         </button>
-        <p class="login-demo">Demo: {{ DEMO_ADMIN.username }} / {{ DEMO_ADMIN.password }}</p>
       </form>
   </div>
 </template>
@@ -175,6 +189,40 @@ async function submit() {
   cursor: not-allowed;
 }
 
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  width: 100%;
+  padding-right: 2.75rem;
+  box-sizing: border-box;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.password-toggle:hover:not(:disabled) {
+  color: var(--red-primary);
+}
+
+.password-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-login {
   padding: 0.875rem 1.5rem;
   background: linear-gradient(135deg, var(--red-primary), var(--red-light));
@@ -197,12 +245,5 @@ async function submit() {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
-}
-
-.login-demo {
-  margin: 0;
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
 }
 </style>

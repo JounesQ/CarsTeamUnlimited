@@ -3,7 +3,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, imageUrl } from '@/api/client'
 import type { VehicleForm } from '@/types/vehicle'
-import { MAKES } from '@/data/vehicleOptions'
+import MakePicker from '@/components/MakePicker.vue'
+import { makeLogoSrc } from '@/data/makeLogos'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,6 +20,7 @@ const draggedIndex = ref<number | null>(null)
 // Confirmation modal state
 const confirmModalOpen = ref(false)
 const confirmModalLoading = ref(false)
+const makePickerOpen = ref(false)
 
 const form = ref<VehicleForm>({
   title: '',
@@ -188,6 +190,11 @@ async function confirmSave() {
   }
 }
 
+function pickMake(value: string) {
+  form.value.make = value
+  makePickerOpen.value = false
+}
+
 onMounted(() => loadVehicle())
 </script>
 
@@ -215,10 +222,25 @@ onMounted(() => loadVehicle())
         </div>
         <div class="field">
           <label>Make *</label>
-          <select v-model="form.make" required>
-            <option value="">Select make</option>
-            <option v-for="m in MAKES" :key="m" :value="m">{{ m }}</option>
-          </select>
+          <button
+            type="button"
+            class="make-field-btn"
+            :class="{ placeholder: !form.make }"
+            aria-haspopup="dialog"
+            :aria-expanded="makePickerOpen"
+            @click="makePickerOpen = true"
+          >
+            <img
+              v-if="form.make && makeLogoSrc(form.make)"
+              :src="makeLogoSrc(form.make)"
+              alt=""
+              class="make-field-logo"
+            />
+            <span>{{ form.make || 'Select make' }}</span>
+            <svg class="make-field-caret" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
         </div>
         <div class="field">
           <label>Price *</label>
@@ -327,6 +349,12 @@ onMounted(() => loadVehicle())
         </div>
       </Transition>
     </Teleport>
+    <MakePicker
+      :open="makePickerOpen"
+      :selected="form.make"
+      @close="makePickerOpen = false"
+      @pick="pickMake"
+    />
   </div>
 </template>
 
@@ -349,6 +377,43 @@ onMounted(() => loadVehicle())
 .field label { font-size: 0.95rem; font-weight: 600; color: var(--color-heading); }
 .field input, .field select { padding: 0.625rem 0.875rem; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background); color: var(--color-text); transition: border-color 0.3s ease; }
 .field input:focus, .field select:focus { outline: none; border-color: var(--red-primary); }
+.make-field-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+.make-field-btn:hover,
+.make-field-btn:focus {
+  outline: none;
+  border-color: var(--red-primary);
+}
+.make-field-btn.placeholder {
+  color: var(--color-text-muted);
+}
+.make-field-btn span {
+  flex: 1;
+  min-width: 0;
+}
+.make-field-logo {
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.make-field-caret {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
 .field.checkbox { flex-direction: row; align-items: center; }
 .field.checkbox label { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
 .td-row {

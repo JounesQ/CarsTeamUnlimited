@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
@@ -13,13 +12,18 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
+        User::query()
+            ->where('username', 'admin')
+            ->orWhere('email', 'admin@admin.com')
+            ->delete();
+
         User::updateOrCreate(
-            ['username' => 'admin'],
+            ['username' => 'ctuadmin@ctu.com'],
             [
-                'name' => 'Admin',
-                'email' => 'admin@admin.com',
-                'username' => 'admin',
-                'password' => Hash::make('admin1234'),
+                'name' => 'CTU Admin',
+                'email' => 'ctuadmin@ctu.com',
+                'username' => 'ctuadmin@ctu.com',
+                'password' => 'ctufinancing140',
                 'is_admin' => true,
             ]
         );

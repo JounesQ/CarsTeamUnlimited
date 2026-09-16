@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, imageUrl } from '@/api/client'
 import type { Vehicle, VehicleForm, Paginated } from '@/types/vehicle'
-import { MAKES } from '@/data/vehicleOptions'
+import MakePicker from '@/components/MakePicker.vue'
+import { makeLogoSrc } from '@/data/makeLogos'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,35 +55,6 @@ const FILTER_STATUS_OPTIONS = [
   { value: 'coming', label: 'Coming' },
   { value: 'sold', label: 'Sold' },
 ]
-
-const MAKE_LOGOS: Record<string, string> = {
-  Honda: '/BrandLogo/honda logo.png',
-  Mitsubishi: '/BrandLogo/mitsu logo.png',
-  Hyundai: '/BrandLogo/hyundai-logo.png',
-  Nissan: '/BrandLogo/nissan-logo.png',
-  Suzuki: '/BrandLogo/suzuki-logo.png',
-  Toyota: '/BrandLogo/toyota-logo.png',
-  Changan: '/BrandLogo/changan-logo.png',
-  Chery: '/BrandLogo/chery-logo.png',
-  Chevrolet: '/BrandLogo/chevrolet-logo.png',
-  Ford: '/BrandLogo/ford-logo.png',
-  Foton: '/BrandLogo/foton-logo.png',
-  GAC: '/BrandLogo/gac-logo.png',
-  Geely: '/BrandLogo/geely-logo.png',
-  JAC: '/BrandLogo/jac-logo.png',
-  Jetour: '/BrandLogo/jetour-logo.jpg',
-  JMC: '/BrandLogo/jmc-logo.jpg',
-  Kia: '/BrandLogo/kia-logo.png',
-  'Morris Garage': '/BrandLogo/MG-logo.png',
-  Peugeot: '/BrandLogo/peugeot-logo.png',
-  SsangYong: '/BrandLogo/ssangyong-logo.png',
-  Subaru: '/BrandLogo/subaru-logo.png',
-}
-
-function makeLogoSrc(make: string) {
-  const path = MAKE_LOGOS[make]
-  return path ? encodeURI(path) : ''
-}
 
 const makePickerOpen = ref(false)
 const hasActiveFilters = computed(() => Boolean(statusFilter.value || makeFilter.value || testDriveFilter.value))
@@ -314,12 +286,6 @@ function showErrorMessage(message: string) {
   }, 3000)
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape' && makePickerOpen.value) {
-    closeMakePicker()
-  }
-}
-
 watch([statusFilter, makeFilter, testDriveFilter], () => {
   load(1)
 })
@@ -327,11 +293,6 @@ watch([statusFilter, makeFilter, testDriveFilter], () => {
 onMounted(() => {
   const page = Math.max(1, parseInt(route.query.page as string, 10) || 1)
   load(page)
-  window.addEventListener('keydown', onKeydown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', onKeydown)
 })
 </script>
 
@@ -622,53 +583,13 @@ onUnmounted(() => {
       </Transition>
     </Teleport>
 
-    <Teleport to="body">
-      <Transition name="modal">
-        <div
-          v-if="makePickerOpen"
-          class="modal-overlay make-picker-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Choose a make"
-          @click.self="closeMakePicker"
-        >
-          <div class="make-picker" @click.stop>
-            <div class="make-picker-head">
-              <h2>Choose a make</h2>
-              <button type="button" class="modal-close-btn" aria-label="Close" @click="closeMakePicker">×</button>
-            </div>
-            <div class="make-picker-grid">
-              <button
-                type="button"
-                class="make-pick"
-                :class="{ active: makeFilter === '' }"
-                @click="pickMake('')"
-              >
-                <span class="make-pick-logo make-pick-logo-empty">All</span>
-                <span>All makes</span>
-              </button>
-              <button
-                v-for="m in MAKES"
-                :key="m"
-                type="button"
-                class="make-pick"
-                :class="{ active: makeFilter === m }"
-                @click="pickMake(m)"
-              >
-                <img
-                  v-if="makeLogoSrc(m)"
-                  :src="makeLogoSrc(m)"
-                  :alt="m"
-                  class="make-pick-logo"
-                />
-                <span v-else class="make-pick-logo make-pick-logo-empty">{{ m.slice(0, 1) }}</span>
-                <span>{{ m }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+    <MakePicker
+      :open="makePickerOpen"
+      :selected="makeFilter"
+      show-all
+      @close="closeMakePicker"
+      @pick="pickMake"
+    />
   </div>
 </template>
 
@@ -870,98 +791,6 @@ onUnmounted(() => {
   left: 22px;
 }
 
-.modal-overlay.make-picker-overlay {
-  z-index: 2100;
-  align-items: flex-end;
-}
-
-.make-picker {
-  width: 100%;
-  max-width: 720px;
-  max-height: min(80vh, 640px);
-  overflow: auto;
-  background: var(--color-background-soft);
-  border: 1px solid var(--color-border);
-  border-radius: 16px 16px 0 0;
-  padding: 1rem 1rem 1.25rem;
-  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
-}
-
-.make-picker-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.85rem;
-}
-
-.make-picker-head h2 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--color-heading);
-}
-
-.make-picker-head .modal-close-btn {
-  position: static;
-  width: 2rem;
-  height: 2rem;
-  font-size: 1.25rem;
-}
-
-.make-picker-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.55rem;
-}
-
-.make-pick {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 0.25rem;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  background: var(--color-background);
-  color: var(--color-text);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-}
-
-.make-pick:hover {
-  border-color: var(--red-primary);
-  color: var(--red-primary);
-}
-
-.make-pick.active {
-  border-color: transparent;
-  background: linear-gradient(135deg, #d81f26 0%, #f0353d 100%);
-  color: #fff;
-}
-
-.make-pick-logo {
-  width: 3.1rem;
-  height: 3.1rem;
-  object-fit: contain;
-}
-
-.make-pick-logo-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--color-background-mute);
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-
-.make-pick.active .make-pick-logo-empty {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-}
-
 .modal-close-btn {
   width: 2.5rem;
   height: 2.5rem;
@@ -1024,14 +853,6 @@ onUnmounted(() => {
   justify-content: center;
   z-index: 2000;
   padding: 1rem;
-}
-
-@media (min-width: 769px) {
-  .modal-overlay.make-picker-overlay { align-items: center; }
-  .make-picker {
-    border-radius: 16px;
-    max-height: min(76vh, 620px);
-  }
 }
 
 .modal-box {
@@ -1437,10 +1258,6 @@ onUnmounted(() => {
 
   .filter-foot {
     padding-left: 0;
-  }
-
-  .make-picker-grid {
-    grid-template-columns: repeat(3, 1fr);
   }
 
   .table-wrap {

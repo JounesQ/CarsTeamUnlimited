@@ -1,12 +1,9 @@
-import { DEMO_TOKEN } from '@/stores/auth'
-import { demoAdmin, demoAuth, isDemoSession } from '@/api/demo'
-
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://127.0.0.1:8000/api'
 
 export function getAuthHeaders(): Record<string, string> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null
   const headers: Record<string, string> = { Accept: 'application/json' }
-  if (token && token !== DEMO_TOKEN) headers['Authorization'] = `Bearer ${token}`
+  if (token) headers['Authorization'] = `Bearer ${token}`
   return headers
 }
 
@@ -47,7 +44,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   })
   if (!res.ok) {
     if (res.status === 401) {
-      if (isDemoSession()) throw new Error('Demo session cannot call the live API.')
       redirectToLogin()
       throw new Error('Session expired. Please log in again.')
     }
@@ -104,11 +100,9 @@ export interface VehicleStats {
 export const api = {
   admin: {
     getStats() {
-      if (isDemoSession()) return demoAdmin.getStats()
       return request<VehicleStats>('/admin/vehicles/stats')
     },
     getVehicles(params?: { page?: number; per_page?: number; status?: string; make?: string; can_test_drive?: boolean }) {
-      if (isDemoSession()) return demoAdmin.getVehicles(params)
       const sp = new URLSearchParams()
       if (params?.page) sp.set('page', String(params.page))
       if (params?.per_page) sp.set('per_page', String(params.per_page))
@@ -119,29 +113,24 @@ export const api = {
       return request<import('@/types/vehicle').Paginated<import('@/types/vehicle').Vehicle>>('/admin/vehicles' + (q ? `?${q}` : ''))
     },
     getVehicle(id: string) {
-      if (isDemoSession()) return demoAdmin.getVehicle(id)
       return request<import('@/types/vehicle').Vehicle>(`/admin/vehicles/${id}`)
     },
     createVehicle(body: import('@/types/vehicle').VehicleForm) {
-      if (isDemoSession()) return demoAdmin.createVehicle(body)
       return request<import('@/types/vehicle').Vehicle>('/admin/vehicles', {
         method: 'POST',
         body: JSON.stringify(prepareBody(body)),
       })
     },
     updateVehicle(id: string, body: import('@/types/vehicle').VehicleForm) {
-      if (isDemoSession()) return demoAdmin.updateVehicle(id, body)
       return request<import('@/types/vehicle').Vehicle>(`/admin/vehicles/${id}`, {
         method: 'PUT',
         body: JSON.stringify(prepareBody(body)),
       })
     },
     deleteVehicle(id: string) {
-      if (isDemoSession()) return demoAdmin.deleteVehicle(id)
       return request<void>(`/admin/vehicles/${id}`, { method: 'DELETE' })
     },
     uploadImage(file: File) {
-      if (isDemoSession()) return demoAdmin.uploadImage(file)
       const url = `${API_BASE}/admin/vehicles/upload-image`
       const form = new FormData()
       form.append('image', file)
@@ -174,11 +163,9 @@ export const api = {
       })
     },
     logout() {
-      if (isDemoSession()) return demoAuth.logout()
       return request<{ message: string }>('/admin/logout', { method: 'POST' })
     },
     me() {
-      if (isDemoSession()) return demoAuth.me()
       return request<{ user: { id: string; name: string; username: string } }>('/admin/me')
     },
   },

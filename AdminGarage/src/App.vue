@@ -7,6 +7,7 @@ import { api } from '@/api/client'
 const { theme, toggleTheme } = useTheme()
 const route = useRoute()
 const isLoginPage = () => route.path === '/login'
+const customerSiteUrl = ((import.meta.env.VITE_CUSTOMER_SITE_URL as string) || 'http://localhost:5173').replace(/\/$/, '')
 
 async function logout() {
   try {
@@ -35,6 +36,20 @@ async function logout() {
         <RouterLink to="/vehicles" class="nav-link">Vehicles</RouterLink>
         <RouterLink to="/stats" class="nav-link">Statistics</RouterLink>
         <RouterLink to="/vehicles/new" class="nav-link">Add Vehicle</RouterLink>
+        <a
+          class="nav-link nav-link-external"
+          :href="customerSiteUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open customer site"
+        >
+          View site
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
         <span v-if="authUser" class="user-badge">{{ authUser.username }}</span>
         <button @click="logout" class="btn-logout" title="Logout">Logout</button>
         <button @click="toggleTheme" class="theme-toggle" :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
@@ -173,6 +188,12 @@ async function logout() {
 
 .nav-link.router-link-active::after {
   width: 60%;
+}
+
+.nav-link-external {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .user-badge {

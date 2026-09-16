@@ -3,18 +3,6 @@ import { ref, computed } from 'vue'
 const TOKEN_KEY = 'admin_token'
 const USER_KEY = 'admin_user'
 
-/** Frontend-only demo login. Do not ship this to production. */
-export const DEMO_ADMIN = {
-  username: 'admin',
-  password: 'admin1234',
-} as const
-
-export const DEMO_TOKEN = 'demo-local-token'
-
-export function isDemoToken(value: string | null = token.value) {
-  return value === DEMO_TOKEN
-}
-
 const token = ref<string | null>(localStorage.getItem(TOKEN_KEY))
 const storedUser = localStorage.getItem(USER_KEY)
 const user = ref<{ id: string; name: string; username: string } | null>(
