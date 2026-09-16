@@ -1016,7 +1016,6 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-heading); font-w
   max-height: 90vh;
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: 0 20px 60px rgba(216, 31, 38, 0.2);
   scrollbar-width: thin;
   scrollbar-color: var(--color-background-mute) var(--color-background-soft);
 }

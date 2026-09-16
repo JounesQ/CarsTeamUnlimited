@@ -507,7 +507,6 @@ onMounted(() => loadVehicle())
   max-width: 450px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(216, 31, 38, 0.3);
 }
 
 .confirm-icon {
