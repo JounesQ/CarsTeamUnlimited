@@ -14,7 +14,7 @@ export const MAKES = [
   'JMMC',
   'Kia',
   'Mitsubishi',
-  'Morris Garage (MG)',
+  'Morris Garage',
   'Nissan',
   'Peugeot',
   'SsangYong',
