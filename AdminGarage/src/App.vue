@@ -7,7 +7,10 @@ import { api } from '@/api/client'
 const { theme, toggleTheme } = useTheme()
 const route = useRoute()
 const isLoginPage = () => route.path === '/login'
-const customerSiteUrl = ((import.meta.env.VITE_CUSTOMER_SITE_URL as string) || 'http://localhost:5173').replace(/\/$/, '')
+const customerSiteUrl = (
+  (import.meta.env.VITE_CUSTOMER_SITE_URL as string)
+  || (import.meta.env.DEV ? 'http://localhost:5173' : 'https://carsteamunlimited.com')
+).replace(/\/$/, '')
 
 async function logout() {
   try {
